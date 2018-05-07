@@ -1,3 +1,5 @@
+import time
+
 from .models import User
 from .serializers import UserSerializer
 
@@ -5,20 +7,36 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 
 
-
-class UserListViewSet(generics.ListCreateAPIView):
+# 创建用户
+class UserCreateView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     def create(self, request, *args, **kwargs):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.datam, status=status.HTTP_400_BAD_REQUEST)
+        paramsDict = request.data
+        if 'phone' in paramsDict.keys() and 'pass_word' in paramsDict.keys() and 'salt' in paramsDict.keys():
+            serializer = UserSerializer(data=request.data)
+            print(serializer)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({
+                    'id': serializer.data['id'],
+                    'timestamp': time.time(),
+                    'code': status.HTTP_200_OK,
+                    'msg': "OK",
+                })
+            return Response({
+                'msg' : 'create error',
+                'code' : status.HTTP_400_BAD_REQUEST,
+            })
+        return Response({
+            'code' : status.HTTP_400_BAD_REQUEST,
+            'msg' : "missing parameter",
+        })
 
 
-class UserDetailViewSet(generics.RetrieveUpdateAPIView):
+# id查用户
+class UserDetailView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     queryset = User.objects.all()
     lookup_field = 'id'
@@ -30,5 +48,7 @@ class UserDetailViewSet(generics.RetrieveUpdateAPIView):
         queryset = self.get_queryset()
         serializer = UserSerializer(queryset, many=True)
         return Response({
-            'data' : serializer.data
+            'code': status.HTTP_200_OK,
+            'actor': serializer.data,
+            'timestamp': time.time(),
         })
