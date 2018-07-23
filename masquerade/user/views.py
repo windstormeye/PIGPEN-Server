@@ -1,82 +1,97 @@
-import time
+from django.shortcuts import HttpResponse
+from django.http import JsonResponse
+from django.contrib.auth.models import User
+from .models import MasUser
+from . import utils
 
-from .models import User
-from .serializers import UserSerializer
+def create_masuser(request):
+    if request.method == 'POST':
+        username = request.POST.get('username', '')
+        password = request.POST.get('password', '')
+        user = User.objects.create_user(username, password)
+        user.save()
+        masuser = MasUser(user=user)
+        masuser.save()
 
-from rest_framework import generics, status
-from rest_framework.response import Response
-from rest_framework_jwt.settings import api_settings
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+        token = utils.create_token(username)
+        json = {
+            'masuser_pk': masuser.pk,
+            'masuser' : {
+                'user_pk' : user.pk,
+                'username' : user.username,
+                'slogan' : '',
+                'work_mes' : '',
+                'interest_mes' : '',
+                'travel_mes' : '',
+                'created_time' : masuser.created_time,
+                'last_updated_time' : masuser.last_updated_time,
+            },
+            'token': token,
+        }
 
-
-# 创建用户
-class UserCreateView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-    def create(self, request, *args, **kwargs):
-        paramsDict = request.data
-        if 'username' in paramsDict.keys() and 'password' in paramsDict.keys() and 'salt' in paramsDict.keys():
-            serializer = UserSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({
-                    'id': serializer.data['id'],
-                    'timestamp': time.time(),
-                    'code': status.HTTP_200_OK,
-                    'msg': "OK",
-                })
-            return Response({
-                'msg' : 'create error',
-                'code' : status.HTTP_400_BAD_REQUEST,
-            })
-        return Response({
-            'code' : status.HTTP_400_BAD_REQUEST,
-            'msg' : "missing parameter",
-        })
+        return HttpResponse(JsonResponse(json))
 
 
-# 有问题
-class UserLogin(generics.RetrieveAPIView):
-    permission_classes = IsAuthenticated
+def login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username', '')
+        password = request.POST.get('password', '')
 
-    def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = UserSerializer(queryset, many=True)
-        if serializer.is_valid():
-
-            currentUser = serializer.save()
-            jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-            jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-            payload = jwt_payload_handler(currentUser)
-            token = jwt_encode_handler(payload)
-
-            return Response({
-                'code': status.HTTP_200_OK,
-                'msg': "OK",
+        masuser = MasUser.objects.get(user__username=username, user__password=password)
+        if masuser:
+            token = utils.get_token(username)
+            if not token:
+                token = utils.create_token(username)
+            json = {
+                'masuser_pk': masuser.pk,
+                'masuser': {
+                    'user_pk': masuser.user.pk,
+                    'username': masuser.user.username,
+                    'slogan': masuser.slogan,
+                    'work_mes': masuser.work_mes,
+                    'interest_mes': masuser.interest_mes,
+                    'travel_mes': masuser.travel_mes,
+                    'created_time': masuser.created_time,
+                    'last_updated_time': masuser.last_updated_time,
+                },
                 'token': token,
-                'actor': serializer.data,
-                'timestamp': time.time(),
-            })
+            }
 
-# 有问题
-# id查用户
-class UserDetailView(generics.RetrieveAPIView):
-    permission_classes = IsAuthenticatedOrReadOnly
+            return HttpResponse(JsonResponse(json))
 
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    lookup_field = 'id'
 
-    def get_queryset(self):
-        return User.objects.filter(id=self.kwargs['id'])
+def logout(request):
+    if request.method == 'GET':
+        username = request.GET.get('username', '')
+        utils.delete_token(username)
+        return HttpResponse(JsonResponse({'islogout' : 'true'}))
 
-    def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = UserSerializer(queryset)
-        return Response({
-            'code': status.HTTP_200_OK,
-            'msg' : "OK",
-            'actor': serializer.data,
-            'timestamp': time.time(),
-        })
+
+def update_user(request):
+    if request.method == 'POST':
+        tokentoken = request.POST.get('tokentoken', '')
+        username = request.POST.get('username', '')
+        masuser_pk = request.POST.get('masuser_pk', '')
+        slogan = request.POST.get('slogan', '')
+        work_mes = request.POST.get('work_mes', '')
+        interest_mes = request.POST.get('interest_mes', '')
+        travel_mes = request.POST.get('travel_mes', '')
+
+        if utils.get_token(username) == tokentoken:
+            MasUser.objects.filter(pk=masuser_pk).update(slogan=slogan, work_mes=work_mes, interest_mes=interest_mes,travel_mes=travel_mes)
+            masuser = MasUser.objects.get(pk=masuser_pk)
+            json = {
+                'masuser_pk': masuser.pk,
+                'masuser': {
+                    'user_pk': masuser.user.pk,
+                    'username': masuser.user.username,
+                    'slogan': masuser.slogan,
+                    'work_mes': masuser.work_mes,
+                    'interest_mes': masuser.interest_mes,
+                    'travel_mes': masuser.travel_mes,
+                    'created_time': masuser.created_time,
+                    'last_updated_time': masuser.last_updated_time,
+                },
+            }
+
+            return HttpResponse(JsonResponse(json))

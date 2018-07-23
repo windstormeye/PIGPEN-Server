@@ -1,14 +1,15 @@
 from django.db import models
+from django.contrib.auth.models import User
 
-class User(models.Model):
-    id          =   models.AutoField(primary_key=True, null=False)
-    username       =   models.CharField(max_length=11, null=False)
-    nick_name   =   models.CharField(max_length=15, null=True)
-    password   =   models.CharField(max_length=16, null=False)
-    status      =   models.CharField(max_length=100, null=True)
-    salt        =   models.CharField(max_length=11, null=False)
-    create_time =   models.DateTimeField(auto_now_add=True, null=False)
-    update_time =   models.DateTimeField(auto_now=True, null=False)
 
-    class Meta:
-        db_table = 'm_user'
+class MasUser(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    slogan = models.CharField(max_length=50, default='')
+    work_mes = models.CharField(max_length=20, default='')
+    interest_mes = models.CharField(max_length=20, default='')
+    travel_mes = models.CharField(max_length=20, default='')
+    created_time = models.DateTimeField(auto_now_add=True)
+    last_updated_time = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return '<User: %s>' % self.user.username

@@ -1,12 +1,9 @@
-from django.conf.urls import url
-
-from rest_framework.urlpatterns import format_suffix_patterns
-
-from .views import UserCreateView, UserDetailView
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    url(r'^register/$', UserCreateView.as_view()),
-    url(r'^info/(?P<id>[0-9]+)/$', UserDetailView.as_view()),
+    path('createmasuser', views.create_masuser, name='create_masuser'),
+    path('login', views.login, name='masuser_login'),
+    path('logout', views.logout, name='masuser_logout'),
+    path('update', views.update_user, name='update_masuser'),
 ]
-
-urlpatterns = format_suffix_patterns(urlpatterns)
