@@ -90,6 +90,7 @@ def update_user(request):
         token = request.POST.get('token', '')
         username = request.POST.get('username', '')
         masuser_pk = request.POST.get('masuser_pk', '')
+        nick_name = request.POST.get('nickName', '')
         slogan = request.POST.get('slogan', '')
         work_mes = request.POST.get('work_mes', '')
         interest_mes = request.POST.get('interest_mes', '')
@@ -97,20 +98,17 @@ def update_user(request):
 
         if utils.get_token(username) == token:
             MasUser.objects.filter(pk=masuser_pk).update(slogan=slogan, work_mes=work_mes, interest_mes=interest_mes,
-                                                         travel_mes=travel_mes)
+                                                         travel_mes=travel_mes, nick_name=nick_name)
             masuser = MasUser.objects.get(pk=masuser_pk)
             json = {
                 'masuser_pk': masuser.pk,
-                'masuser': {
-                    'user_pk': masuser.user.pk,
-                    'username': masuser.user.username,
-                    'slogan': masuser.slogan,
-                    'work_mes': masuser.work_mes,
-                    'interest_mes': masuser.interest_mes,
-                    'travel_mes': masuser.travel_mes,
-                    'created_time': masuser.created_time,
-                    'last_updated_time': masuser.last_updated_time,
-                },
+                'nick_name': masuser.nick_name,
+                'slogan': masuser.slogan,
+                'work_mes': masuser.work_mes,
+                'interest_mes': masuser.interest_mes,
+                'travel_mes': masuser.travel_mes,
+                'created_time': masuser.created_time,
+                'last_updated_time': masuser.last_updated_time,
             }
             return HttpResponse(JsonResponse(json))
         else:

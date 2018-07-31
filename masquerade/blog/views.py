@@ -90,7 +90,7 @@ def blog_list(request):
             'msg': "请求方法错误",
         }
         return HttpResponse(JsonResponse(json))
-    
+
 
 def delete_blog(request):
     if request.method == 'GET':
@@ -127,6 +127,52 @@ def delete_blog(request):
             }
             return HttpResponse(JsonResponse(json))
 
+    else:
+        json = {
+            'msgCode': 2001,
+            'msg': "请求方法错误",
+        }
+        return HttpResponse(JsonResponse(json))
+
+
+def get_user_blog(request):
+    if request.method == 'GET':
+        token = request.GET.get('token', '')
+        username = request.GET.get('username', '')
+        userId = request.GET.get('masuserId', '')
+        if token and username and userId:
+            if token == utils.get_token(username):
+                blogs = Blog.objects.filter(masuser__pk=userId)
+                final_blogs = []
+                for blog in blogs:
+                    b = {
+                        'content': blog.content,
+                        'created_time': blog.created_time,
+                    }
+                    final_blogs.append(b)
+                if blogs:
+                    json = {
+                        'blogs': list(final_blogs)
+                    }
+                    return HttpResponse(JsonResponse(json))
+                else:
+                    json = {
+                        'msgCode': 2333,
+                        'msg': '该用户未发布文章'
+                    }
+                    return HttpResponse(JsonResponse(json))
+            else:
+                json = {
+                    'msgCode': 1001,
+                    'msg': "token失效，请更新",
+                }
+                return HttpResponse(JsonResponse(json))
+        else:
+            json = {
+                'msgCode': 1002,
+                'msg': "参数错误",
+            }
+            return HttpResponse(JsonResponse(json))
     else:
         json = {
             'msgCode': 2001,
