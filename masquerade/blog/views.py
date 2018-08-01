@@ -5,6 +5,7 @@ from .models import Blog
 from user import utils
 from user.models import MasUser
 from read_statistics.models import ReadNumber
+from like_statistics.models import LikeCount
 
 
 def create_blog(request):
@@ -67,14 +68,20 @@ def blog_list(request):
                 masuserId = blog['masuser_id']
                 masuser = MasUser.objects.get(pk=masuserId)
                 masuser_json = {
-                    'username': masuser.user.username,
                     'nick_name': masuser.nick_name,
-                    'slogan': masuser.slogan,
-                    'work_mes': masuser.work_mes,
-                    'interest_mes': masuser.interest_mes,
-                    'travel_mes': masuser.travel_mes,
                 }
+                # replace field `masuser`
                 blog['masuser'] = masuser_json
+
+                # get blog read_num
+                content_type = ContentType.objects.get(model='blog')
+                readnum, create = ReadNumber.objects.get_or_create(content_type=content_type, object_id=blog['id'])
+                blog['read_num'] = readnum.read_num
+
+                # get blog like_num
+                like_count, created = LikeCount.objects.get_or_create(content_type=content_type, object_id=blog['id'])
+                blog['like_num'] = like_count.liked_num
+
                 final_blogs.append(blog)
             json = {
                 'blogs': list(final_blogs),
