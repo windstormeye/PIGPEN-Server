@@ -64,54 +64,59 @@ def get_comment(request):
     if request.method == 'POST':
         token = request.POST.get('token', '')
         username = request.POST.get('username', '')
-        if token == utils.get_token(username):
-            # blog | comment
-            contentType = request.POST.get('content_type', '')
-            content_id = request.POST.get('content_id', '')
+        contentType = request.POST.get('content_type', '')
+        content_id = request.POST.get('content_id', '')
+        if token and username and contentType and content_id:
+            if token == utils.get_token(username):
+                # 获取传入content_type的model类型
+                content_type = ContentType.objects.get(model=contentType)
+                parent_comments = Comment.objects.filter(content_type=content_type, object_id=content_id, parent=None)
+                final_comments = []
 
-            # 获取传入content_type的model类型
-            content_type = ContentType.objects.get(model=contentType)
-            parent_comments = Comment.objects.filter(content_type=content_type, object_id=content_id, parent=None)
-            final_comments = []
-
-            for comment in parent_comments:
-                child_comments = Comment.objects.filter(content_type=content_type, object_id=content_id, root=comment)
-                child_final_comments = []
-                if child_comments.exists():
-                    for c_m in child_comments:
-                        reply_to = c_m.parent.masuser.nick_name
-                        cc = {
-                            'comment_id': c_m.pk,
-                            'comment_content': c_m.text,
-                            'comment_created_time': c_m.comment_time.timestamp(),
-                            'masuser': {
-                                'nick_name': MasUser.objects.get(pk=c_m.masuser.pk).nick_name
-                            },
-                            'reply_to_masuser': {
-                                'nick_name': reply_to,
+                for comment in parent_comments:
+                    child_comments = Comment.objects.filter(content_type=content_type, object_id=content_id, root=comment)
+                    child_final_comments = []
+                    if child_comments.exists():
+                        for c_m in child_comments:
+                            reply_to = c_m.parent.masuser.nick_name
+                            cc = {
+                                'comment_id': c_m.pk,
+                                'comment_content': c_m.text,
+                                'comment_created_time': c_m.comment_time.timestamp(),
+                                'masuser': {
+                                    'nick_name': MasUser.objects.get(pk=c_m.masuser.pk).nick_name
+                                },
+                                'reply_to_masuser': {
+                                    'nick_name': reply_to,
+                                }
                             }
-                        }
-                        child_final_comments.append(cc)
-                c_masuser = MasUser.objects.get(pk=comment.masuser.pk)
-                c = {
-                    'comment_id': comment.pk,
-                    'comment_content': comment.text,
-                    'comment_created_time': comment.comment_time.timestamp(),
-                    'masuser': {
-                        'username': c_masuser.nick_name
-                    },
-                    'child_comments': list(child_final_comments)
-                }
-                final_comments.append(c)
+                            child_final_comments.append(cc)
+                    c_masuser = MasUser.objects.get(pk=comment.masuser.pk)
+                    c = {
+                        'comment_id': comment.pk,
+                        'comment_content': comment.text,
+                        'comment_created_time': comment.comment_time.timestamp(),
+                        'masuser': {
+                            'username': c_masuser.nick_name
+                        },
+                        'child_comments': list(child_final_comments)
+                    }
+                    final_comments.append(c)
 
-            json = {
-                'comments': list(final_comments)
-            }
-            return HttpResponse(JsonResponse(json))
+                json = {
+                    'comments': list(final_comments)
+                }
+                return HttpResponse(JsonResponse(json))
+            else:
+                json = {
+                    'msgCode': 1001,
+                    'msg': "token失效，请更新",
+                }
+                return HttpResponse(JsonResponse(json))
         else:
             json = {
-                'msgCode': 1001,
-                'msg': "token失效，请更新",
+                'msgCode': 1002,
+                'msg': '参数错误'
             }
             return HttpResponse(JsonResponse(json))
     else:
@@ -124,7 +129,34 @@ def get_comment(request):
 
 def delete_comment(request):
     if request.method == 'POST':
-        pass
+        token = request.POST.get('token', '')
+        masuser_name = request.POST.get('masuer_name', '')
+        masuser_id = request.POST.get('masuser_id', '')
+        contentType = request.POST.get('content_type', '')
+        content_id = request.POST.get('content_id', '')
+
+        if token and masuser_id and masuser_name and contentType and content_id:
+            if token == utils.get_token(masuser_name):
+                content_type = ContentType.objects.get(model=contentType)
+                masuser = MasUser.objects.get(pk=masuser_id)
+                Comment.objects.filter(content_type=content_type, pk=content_id, masuser=masuser).delete()
+                json = {
+                    'msgCode': 666,
+                    'msg': "删除成功",
+                }
+                return HttpResponse(JsonResponse(json))
+            else:
+                json = {
+                    'msgCode': 1001,
+                    'msg': "token失效，请更新",
+                }
+                return HttpResponse(JsonResponse(json))
+        else:
+            json = {
+                'msgCode': 1002,
+                'msg': '参数错误'
+            }
+            return HttpResponse(JsonResponse(json))
     else:
         json = {
             'msgCode': 2001,

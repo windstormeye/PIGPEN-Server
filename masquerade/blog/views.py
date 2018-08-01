@@ -1,8 +1,10 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import  HttpResponse
+from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse
 from .models import Blog
 from user import utils
 from user.models import MasUser
+from read_statistics.models import ReadNumber
 
 
 def create_blog(request):
@@ -161,6 +163,52 @@ def get_user_blog(request):
                         'msg': '该用户未发布文章'
                     }
                     return HttpResponse(JsonResponse(json))
+            else:
+                json = {
+                    'msgCode': 1001,
+                    'msg': "token失效，请更新",
+                }
+                return HttpResponse(JsonResponse(json))
+        else:
+            json = {
+                'msgCode': 1002,
+                'msg': "参数错误",
+            }
+            return HttpResponse(JsonResponse(json))
+    else:
+        json = {
+            'msgCode': 2001,
+            'msg': "请求方法错误",
+        }
+        return HttpResponse(JsonResponse(json))
+
+
+def blog_details(request):
+    if request.method == 'GET':
+        token = request.GET.get('token', '')
+        username = request.GET.get('user_name', '')
+        content_type = request.GET.get('content_type', '')
+        # blog_id
+        object_id = request.GET.get('object_id', '')
+
+        if token and username and content_type and object_id:
+            if token == utils.get_token(username):
+                contentType = ContentType.objects.get(model=content_type)
+                readnum, create = ReadNumber.objects.get_or_create(content_type=contentType, object_id=object_id)
+                readnum.read_num += 1
+                readnum.save()
+                blog = Blog.objects.get(pk=object_id)
+                json = {
+                    'blog': {
+                        'read_num': readnum.read_num,
+                        'blog_content': blog.content,
+                        'blog_created_time': blog.created_time.timestamp(),
+                    },
+                    'masuser': {
+                        'nick_name': blog.masuser.nick_name,
+                    }
+                }
+                return HttpResponse(JsonResponse(json))
             else:
                 json = {
                     'msgCode': 1001,
