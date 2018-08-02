@@ -1,143 +1,106 @@
-from django.shortcuts import HttpResponse
-from django.http import JsonResponse
 from django.contrib.auth.models import User
 from .models import MasUser
-from . import utils
+from common import token_utils, utils, decorator
 
 
+@decorator.request_methon('POST')
+@decorator.request_check_args(['username', 'password'])
 def create_masuser(request):
-    if request.method == 'POST':
-        username = request.POST.get('username', '')
-        password = request.POST.get('password', '')
-        user = User.objects.create_user(username, password)
-        user.save()
-        masuser = MasUser(user=user)
-        masuser.save()
+    username = request.POST.get('username', '')
+    password = request.POST.get('password', '')
+    user = User.objects.create_user(username, password)
+    user.save()
+    masuser = MasUser(user=user)
+    masuser.save()
 
-        token = utils.create_token(username)
+    token = token_utils.create_token(username)
+    json = {
+        'masuser_pk': masuser.pk,
+        'masuser': {
+            'user_pk': user.pk,
+            'username': user.username,
+            'slogan': '',
+            'work_mes': '',
+            'interest_mes': '',
+            'travel_mes': '',
+            'created_time': masuser.created_time.timestamp(),
+        },
+        'token': token,
+    }
+    return utils.SuccessResponse(json)
+
+
+@decorator.request_methon('POST')
+@decorator.request_check_args(['username', 'password'])
+def login(request):
+    username = request.POST.get('username', '')
+    password = request.POST.get('password', '')
+
+    masuser = MasUser.objects.get(user__username=username, user__password=password)
+    if masuser:
+        token = token_utils.get_token(username)
+        if not token:
+            token = token_utils.create_token(username)
         json = {
             'masuser_pk': masuser.pk,
             'masuser': {
-                'user_pk': user.pk,
-                'username': user.username,
-                'slogan': '',
-                'work_mes': '',
-                'interest_mes': '',
-                'travel_mes': '',
-                'created_time': masuser.created_time,
-                'last_updated_time': masuser.last_updated_time,
+                'user_pk': masuser.user.pk,
+                'username': masuser.user.username,
+                'slogan': masuser.slogan,
+                'work_mes': masuser.work_mes,
+                'interest_mes': masuser.interest_mes,
+                'travel_mes': masuser.travel_mes,
+                'created_time': masuser.created_time.timestamp(),
             },
             'token': token,
         }
-        return HttpResponse(JsonResponse(json))
-    else:
-        json = {
-            'msgCode': 2001,
-            'msg': "请求方法错误",
-        }
-        return HttpResponse(JsonResponse(json))
+        return utils.SuccessResponse(json)
 
 
-def login(request):
-    if request.method == 'POST':
-        username = request.POST.get('username', '')
-        password = request.POST.get('password', '')
-
-        masuser = MasUser.objects.get(user__username=username, user__password=password)
-        if masuser:
-            token = utils.get_token(username)
-            if not token:
-                token = utils.create_token(username)
-            json = {
-                'masuser_pk': masuser.pk,
-                'masuser': {
-                    'user_pk': masuser.user.pk,
-                    'username': masuser.user.username,
-                    'slogan': masuser.slogan,
-                    'work_mes': masuser.work_mes,
-                    'interest_mes': masuser.interest_mes,
-                    'travel_mes': masuser.travel_mes,
-                    'created_time': masuser.created_time,
-                    'last_updated_time': masuser.last_updated_time,
-                },
-                'token': token,
-            }
-            return HttpResponse(JsonResponse(json))
-
-    else:
-        json = {
-            'msgCode': 2001,
-            'msg': "请求方法错误",
-        }
-        return HttpResponse(JsonResponse(json))
-
-
+@decorator.request_methon('GET')
+@decorator.request_check_args(['username'])
 def logout(request):
-    if request.method == 'GET':
-        username = request.GET.get('username', '')
-        utils.delete_token(username)
-        return HttpResponse(JsonResponse({'islogout': 'true'}))
-    else:
-        json = {
-            'msgCode': 2001,
-            'msg': "请求方法错误",
-        }
-        return HttpResponse(JsonResponse(json))
+    username = request.GET.get('username', '')
+    token_utils.delete_token(username)
+    json = {
+        'isLoginout': 'true'
+    }
+    return utils.SuccessResponse(json)
 
 
+@decorator.request_methon('POST')
+@decorator.request_check_args(['masuser_id', 'nickName', 'slogan', 'work_mes', 'interest_mes', 'travel_mes'])
 def update_user(request):
-    if request.method == 'POST':
-        token = request.POST.get('token', '')
-        username = request.POST.get('username', '')
-        masuser_pk = request.POST.get('masuser_pk', '')
+        masuser_pk = request.POST.get('masuser_id', '')
         nick_name = request.POST.get('nickName', '')
         slogan = request.POST.get('slogan', '')
         work_mes = request.POST.get('work_mes', '')
         interest_mes = request.POST.get('interest_mes', '')
         travel_mes = request.POST.get('travel_mes', '')
 
-        if utils.get_token(username) == token:
-            MasUser.objects.filter(pk=masuser_pk).update(slogan=slogan, work_mes=work_mes, interest_mes=interest_mes,
-                                                         travel_mes=travel_mes, nick_name=nick_name)
-            masuser = MasUser.objects.get(pk=masuser_pk)
-            json = {
-                'masuser_pk': masuser.pk,
-                'nick_name': masuser.nick_name,
-                'slogan': masuser.slogan,
-                'work_mes': masuser.work_mes,
-                'interest_mes': masuser.interest_mes,
-                'travel_mes': masuser.travel_mes,
-                'created_time': masuser.created_time,
-                'last_updated_time': masuser.last_updated_time,
-            }
-            return HttpResponse(JsonResponse(json))
-        else:
-            json = {
-                'msgCode': 1001,
-                'msg': "token失效，请更新",
-            }
-            return HttpResponse(JsonResponse(json))
-    else:
+        MasUser.objects.filter(pk=masuser_pk).update(slogan=slogan, work_mes=work_mes, interest_mes=interest_mes,
+                                                     travel_mes=travel_mes, nick_name=nick_name)
+        masuser = MasUser.objects.get(pk=masuser_pk)
         json = {
-            'msgCode': 2001,
-            'msg': "请求方法错误",
+            'masuser_pk': masuser.pk,
+            'nick_name': masuser.nick_name,
+            'slogan': masuser.slogan,
+            'work_mes': masuser.work_mes,
+            'interest_mes': masuser.interest_mes,
+            'travel_mes': masuser.travel_mes,
+            'created_time': masuser.created_time.timestamp(),
         }
-        return HttpResponse(JsonResponse(json))
+        return utils.SuccessResponse(json)
 
 
+@decorator.request_methon('GET')
+@decorator.request_check_args(['username'])
 def update_token(request):
-    if request.method == 'GET':
-        username = request.GET.get('username')
+    username = request.GET.get('username')
 
-        utils.delete_token(username)
-        token = utils.create_token(username)
-        json = {
-            'token': token,
-        }
-        return HttpResponse(JsonResponse(json))
-    else:
-        json = {
-            'msgCode': 2001,
-            'msg': "请求方法错误",
-        }
-        return HttpResponse(JsonResponse(json))
+    token_utils.delete_token(username)
+    token = token_utils.create_token(username)
+    json = {
+        'token': token,
+    }
+    return utils.SuccessResponse(json)
