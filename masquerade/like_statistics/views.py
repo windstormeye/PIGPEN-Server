@@ -33,7 +33,12 @@ def like_change(request):
             like_count, created = LikeCount.objects.get_or_create(content_type=content_type, object_id=object_id)
             like_count.liked_num += 1
             like_count.save()
-            return utils.SuccessResponse(like_count.liked_num)
+
+            json = {
+                'blog_id': object_id,
+                'like_num': like_count.liked_num,
+            }
+            return utils.SuccessResponse()
         else:
             # did like, not like
             return utils.ErrorResponse(2333, '已点赞过该文章')

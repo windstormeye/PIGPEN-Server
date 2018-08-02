@@ -1,6 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
 from .models import Blog
-from common import token_utils
 from user.models import MasUser
 from read_statistics.models import ReadNumber
 from like_statistics.models import LikeCount
@@ -13,14 +12,13 @@ from common import utils, decorator
 def create_blog(request):
     masuserId = request.POST.get('masuser_id', '')
     content = request.POST.get('content', '')
-
     masuser = MasUser.objects.get(pk=masuserId)
+
     if not masuser:
         return utils.ErrorResponse(2333, '用户不存在')
+
     blog = Blog(content=content, masuser=masuser)
     blog.save()
-    if not blog:
-        return utils.ErrorResponse(2333, '文章创建失败')
 
     return utils.SuccessResponse('发布成功')
 

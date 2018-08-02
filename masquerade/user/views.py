@@ -1,51 +1,29 @@
-from django.contrib.auth.models import User
+import hashlib, time
 from .models import MasUser
 from common import token_utils, utils, decorator
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['username', 'password'])
+@decorator.request_check_args(['username', 'password', 'timestamp'])
 def create_masuser(request):
     username = request.POST.get('username', '')
+    # password is a hash_str
     password = request.POST.get('password', '')
-    user = User.objects.create_user(username, password)
-    user.save()
-    masuser = MasUser(user=user)
-    masuser.save()
+    timestamp = request.POST.get('timestamp', '')
 
-    token = token_utils.create_token(username)
-    json = {
-        'masuser_pk': masuser.pk,
-        'masuser': {
-            'user_pk': user.pk,
-            'username': user.username,
-            'slogan': '',
-            'work_mes': '',
-            'interest_mes': '',
-            'travel_mes': '',
-            'created_time': masuser.created_time.timestamp(),
-        },
-        'token': token,
-    }
-    return utils.SuccessResponse(json)
+    # valid within 5 minutes
+    now_timestamp = time.time() / 300
+    if (int(int(timestamp) + 300)) > now_timestamp:
 
+        # User'password is another hash_str
+        masuser = MasUser(username=username, password=password)
+        masuser.save()
 
-@decorator.request_methon('POST')
-@decorator.request_check_args(['username', 'password'])
-def login(request):
-    username = request.POST.get('username', '')
-    password = request.POST.get('password', '')
-
-    masuser = MasUser.objects.get(user__username=username, user__password=password)
-    if masuser:
-        token = token_utils.get_token(username)
-        if not token:
-            token = token_utils.create_token(username)
+        token = token_utils.create_token(username)
         json = {
             'masuser_pk': masuser.pk,
             'masuser': {
-                'user_pk': masuser.user.pk,
-                'username': masuser.user.username,
+                'nick_nick': masuser.nick_name,
                 'slogan': masuser.slogan,
                 'work_mes': masuser.work_mes,
                 'interest_mes': masuser.interest_mes,
@@ -55,6 +33,50 @@ def login(request):
             'token': token,
         }
         return utils.SuccessResponse(json)
+    else:
+        return utils.ErrorResponse('2333', '已超时')
+
+
+@decorator.request_methon('POST')
+@decorator.request_check_args(['username', 'sign', 'timestamp'])
+def login(request):
+    username = request.POST.get('username', '')
+    sign = request.POST.get('sign', '')
+    timestamp = request.POST.get('timestamp', '')
+
+    # valid within 5 minutes
+    now_timestamp = time.time() / 300
+    if (int(timestamp) + 300) > now_timestamp:
+
+        masuser = MasUser.objects.get(username=username)
+
+        md5 = hashlib.md5()
+        md5.update((masuser.password + timestamp).encode('utf-8'))
+        masuser_password_hash = md5.hexdigest()
+
+        if sign == masuser_password_hash:
+            token = token_utils.get_token(username)
+            if not token:
+                token = token_utils.create_token(username)
+                json = {
+                    'masuser': {
+                        'masuser_id': masuser.id,
+                        'username': masuser.nick_name,
+                        'slogan': masuser.slogan,
+                        'work_mes': masuser.work_mes,
+                        'interest_mes': masuser.interest_mes,
+                        'travel_mes': masuser.travel_mes,
+                        'created_time': masuser.created_time.timestamp(),
+                    },
+                    'token': token,
+                }
+                return utils.SuccessResponse(json)
+            else:
+                return utils.ErrorResponse('2333', '已登录')
+        else:
+            return utils.ErrorResponse('2333', '密码错误')
+    else:
+        return utils.ErrorResponse('2333', '已超时')
 
 
 @decorator.request_methon('GET')

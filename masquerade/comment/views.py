@@ -1,6 +1,4 @@
-from django.http import JsonResponse
 from django.contrib.contenttypes.models import ContentType
-from common import token_utils
 from user.models import MasUser
 from .models import Comment
 from common import utils, decorator
@@ -20,7 +18,7 @@ def create_comment(request):
     model_obj = model_class.objects.get(pk=content_id)
     comment = Comment(text=text, masuser=masuser, content_object=model_obj)
 
-    parent_id = request.POST.get('parentId', '')
+    parent_id = request.POST.get('parent_id', '')
     if parent_id:
         parent = Comment.objects.get(pk=parent_id)
         if parent:

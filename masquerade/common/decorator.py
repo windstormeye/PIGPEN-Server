@@ -22,9 +22,10 @@ def request_check_args(args=None):
                 request_args = request.POST.dict().keys()
             else:
                 request_args = request.GET.dict().keys()
-            if args == list(request_args):
-                return func(request)
-            else:
-                return utils.ErrorResponse(1002, '参数错误')
+            # allow multi-args
+            for item in args:
+                if item not in request_args:
+                    return utils.ErrorResponse(1002, '参数错误')
+            return func(request)
         return wrapper
     return decorator
