@@ -20,7 +20,7 @@ class tokenCheckMiddleware(MiddlewareMixin):
                     else:
                         return utils.ErrorResponse(1001, 'token失效，请更新')
                 else:
-                    return utils.ErrorResponse('2333', '已超时')
+                    return utils.ErrorResponse(2333, '已超时')
             else:
                 return utils.ErrorResponse(1002, '参数错误')
 

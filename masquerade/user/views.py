@@ -21,7 +21,7 @@ def create_masuser(request):
 
         token = token_utils.create_token(username)
         json = {
-            'masuser_pk': masuser.pk,
+            'masuser_id': masuser.pk,
             'masuser': {
                 'nick_nick': masuser.nick_name,
                 'slogan': masuser.slogan,
@@ -99,6 +99,27 @@ def logout(request):
 
 
 @decorator.request_methon('POST')
+@decorator.request_check_args([])
+def get_user_details(request):
+    masuser_id = request.POST.get('masuser_id')
+
+    masuser = MasUser.objects.get(pk=masuser_id)
+
+    json = {
+        'masuser_id': masuser.pk,
+        'nick_name': masuser.nick_name,
+        'slogan': masuser.slogan,
+        'work_mes': masuser.work_mes,
+        'interest_mes': masuser.interest_mes,
+        'travel_mes': masuser.travel_mes,
+        'created_time': masuser.created_time.timestamp(),
+    }
+
+    masLogger.log(request, 666)
+    return utils.SuccessResponse(json)
+
+
+@decorator.request_methon('POST')
 @decorator.request_check_args(['slogan', 'work_mes', 'interest_mes', 'travel_mes'])
 def update_user(request):
     masuser_pk = request.POST.get('masuser_id', '')
@@ -112,7 +133,7 @@ def update_user(request):
                                                  travel_mes=travel_mes, nick_name=nick_name)
     masuser = MasUser.objects.get(pk=masuser_pk)
     json = {
-        'masuser_pk': masuser.pk,
+        'masuser_id': masuser.pk,
         'nick_name': masuser.nick_name,
         'slogan': masuser.slogan,
         'work_mes': masuser.work_mes,
