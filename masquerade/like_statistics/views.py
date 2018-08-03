@@ -3,11 +3,11 @@ from django.db.models import ObjectDoesNotExist
 from .models import LikeCount, LikeRecord
 from user.models import MasUser
 from blog.models import Blog
-from common import utils, decorator
+from common import utils, decorator, masLogger
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['content_type', 'object_id', 'masuser_id', 'is_like'])
+@decorator.request_check_args(['content_type', 'object_id', 'is_like'])
 def like_change(request):
     masuser_id = request.POST.get('masuser_id', '')
     is_like = request.POST.get('is_like', '')
@@ -38,9 +38,11 @@ def like_change(request):
                 'blog_id': object_id,
                 'like_num': like_count.liked_num,
             }
-            return utils.SuccessResponse()
+            masLogger.log(request, 666)
+            return utils.SuccessResponse(json)
         else:
             # did like, not like
+            masLogger.log(request, 2333, '已点赞过该文章')
             return utils.ErrorResponse(2333, '已点赞过该文章')
     else:
         # cancle like
@@ -53,36 +55,42 @@ def like_change(request):
             if not created:
                 like_count.liked_num -= 1
                 like_count.save()
+
+                masLogger.log(request, 666)
                 return utils.SuccessResponse(like_count.liked_num)
             else:
+                masLogger.log(request, 2333, '数据异常')
                 return utils.ErrorResponse(2333, '数据异常')
         else:
             # not liking, cann't cancle like
+            masLogger.log(request, 2333, '未点赞过该文章')
             return utils.ErrorResponse(2333, '未点赞过该文章')
 
 
 @decorator.request_methon('GET')
-@decorator.request_check_args(['masuser_id'])
+@decorator.request_check_args([])
 def get_like_blog(request):
-        masuser_id = request.GET.get('masuser_id', '')
+    masuser_id = request.GET.get('masuser_id', '')
 
-        masuser = MasUser.objects.get(pk=masuser_id)
-        like_records = LikeRecord.objects.filter(masuser=masuser)
-        final_likes = []
-        for like in like_records:
-            blog = Blog.objects.get(pk=like.object_id)
+    masuser = MasUser.objects.get(pk=masuser_id)
+    like_records = LikeRecord.objects.filter(masuser=masuser)
+    final_likes = []
+    for like in like_records:
+        blog = Blog.objects.get(pk=like.object_id)
 
-            l = {
-                'blog': {
-                    'masuser': {
-                        'nick_name': like.masuser.nick_name,
-                    },
-                    'content': blog.content,
-                    'created_time': blog.created_time.timestamp()
+        l = {
+            'blog': {
+                'masuser': {
+                    'nick_name': like.masuser.nick_name,
                 },
-            }
-            final_likes.append(l)
-        json = {
-            'blogs': list(final_likes)
+                'content': blog.content,
+                'created_time': blog.created_time.timestamp()
+            },
         }
-        return utils.SuccessResponse(json)
+        final_likes.append(l)
+    json = {
+        'blogs': list(final_likes)
+    }
+
+    masLogger.log(request, 666)
+    return utils.SuccessResponse(json)

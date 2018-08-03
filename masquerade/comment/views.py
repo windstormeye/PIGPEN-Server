@@ -1,11 +1,11 @@
 from django.contrib.contenttypes.models import ContentType
 from user.models import MasUser
 from .models import Comment
-from common import utils, decorator
+from common import utils, decorator, masLogger
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['content_type', 'content_id', 'masuser_id', 'text'])
+@decorator.request_check_args(['content_type', 'content_id', 'text'])
 def create_comment(request):
     masuserId = request.POST.get('masuser_id', '')
     text = request.POST.get('text', '')
@@ -30,6 +30,7 @@ def create_comment(request):
                 comment.root = parent
     comment.save()
 
+    masLogger.log(request, 666, '评论发布成功')
     return utils.SuccessResponse('评论发布成功')
 
 
@@ -77,11 +78,12 @@ def get_comment(request):
     json = {
         'comments': list(final_comments)
     }
+    masLogger.log(request, 666)
     return utils.SuccessResponse(json)
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['content_type', 'content_id', 'masuser_id'])
+@decorator.request_check_args(['content_type', 'content_id'])
 def delete_comment(request):
     masuser_id = request.POST.get('masuser_id', '')
     contentType = request.POST.get('content_type', '')
@@ -91,4 +93,5 @@ def delete_comment(request):
     masuser = MasUser.objects.get(pk=masuser_id)
     Comment.objects.filter(content_type=content_type, pk=content_id, masuser=masuser).delete()
 
+    masLogger.log(request, 666, '删除成功')
     return utils.SuccessResponse('删除成功')

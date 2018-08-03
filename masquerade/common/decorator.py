@@ -10,8 +10,16 @@ def request_methon(method):
                 return func(request)
             else:
                 return utils.ErrorResponse(2001, '请求方法错误')
+
         return wrapper
+
     return decorator
+
+
+'''
+    @description    every API should put `masuser_id` and `nick_name` keys.
+                    If args=None, should put null list, e.g: []    
+'''
 
 
 def request_check_args(args=None):
@@ -23,9 +31,13 @@ def request_check_args(args=None):
             else:
                 request_args = request.GET.dict().keys()
             # allow multi-args
+            args.append('masuser_id')
+            args.append('nick_name')
             for item in args:
                 if item not in request_args:
                     return utils.ErrorResponse(1002, '参数错误')
             return func(request)
+
         return wrapper
+
     return decorator

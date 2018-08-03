@@ -4,11 +4,11 @@ from user.models import MasUser
 from read_statistics.models import ReadNumber
 from like_statistics.models import LikeCount
 from comment.models import Comment
-from common import utils, decorator
+from common import utils, decorator, masLogger
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['content', 'masuser_id'])
+@decorator.request_check_args(['content'])
 def create_blog(request):
     masuserId = request.POST.get('masuser_id', '')
     content = request.POST.get('content', '')
@@ -24,6 +24,7 @@ def create_blog(request):
 
 
 @decorator.request_methon('GET')
+@decorator.request_check_args([])
 def blog_list(request):
     blogs = Blog.objects.all().values()
     final_blogs = []
@@ -45,25 +46,32 @@ def blog_list(request):
     json = {
         'blogs': list(final_blogs),
     }
+
+    # info log
+    masLogger.log(request, 666)
+
     return utils.SuccessResponse(json)
 
 
 @decorator.request_methon('GET')
-@decorator.request_check_args(['blog_id', 'masuser_id'])
+@decorator.request_check_args(['blog_id'])
 def delete_blog(request):
-    masuser_id = request.GET.get('masuser_id', '')
-    blog_id = request.GET.get('blog_id', '')
+    masuser_id = request.GET.get('masuser_id')
+    blog_id = request.GET.get('blog_id')
     blog = Blog.objects.get(pk=blog_id)
     # 记得string to int
     if blog.masuser.pk == int(masuser_id):
         Blog.objects.filter(pk=blog_id).delete()
+
+        masLogger.log(request, 666, '删除成功')
         return utils.SuccessResponse('删除成功')
     else:
+        masLogger.log(request, 2333, '删除失败，只能删除自己发布的文章')
         return utils.ErrorResponse(2333, '删除失败，只能删除自己发布的文章')
 
 
 @decorator.request_methon('GET')
-@decorator.request_check_args(['masuser_id'])
+@decorator.request_check_args([])
 def get_user_blog(request):
     userId = request.GET.get('masuser_id', '')
 
@@ -80,8 +88,10 @@ def get_user_blog(request):
         json = {
             'blogs': list(final_blogs)
         }
+        masLogger.log(request, 666)
         return utils.SuccessResponse(json)
     else:
+        masLogger.log(request, 2333, '该用户未发布文章')
         return utils.ErrorResponse(2333, '该用户未发布文章')
 
 
@@ -116,4 +126,5 @@ def blog_details(request):
             'nick_name': blog.masuser.nick_name,
         }
     }
+    masLogger.log(request, 666)
     return utils.SuccessResponse(json)
