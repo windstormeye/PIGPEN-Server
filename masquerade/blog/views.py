@@ -15,11 +15,13 @@ def create_blog(request):
     masuser = MasUser.objects.get(pk=masuserId)
 
     if not masuser:
+        masLogger.log(request, 2333, '用户不存在')
         return utils.ErrorResponse(2333, '用户不存在')
 
     blog = Blog(content=content, masuser=masuser)
     blog.save()
 
+    masLogger.log(request, 666)
     return utils.SuccessResponse('发布成功')
 
 
@@ -35,7 +37,7 @@ def blog_list(request):
             'nick_name': masuser.nick_name,
         }
         # replace field `masuser`
-        blog['masuser'] = masuser_json
+        blog['masuser'] = masuser.toJSON()
 
         # get blog read_num
         content_type = ContentType.objects.get(model='blog')
@@ -49,7 +51,6 @@ def blog_list(request):
 
     # info log
     masLogger.log(request, 666)
-
     return utils.SuccessResponse(json)
 
 
@@ -122,9 +123,7 @@ def blog_details(request):
             'blog_content': blog.content,
             'blog_created_time': blog.created_time.timestamp(),
         },
-        'masuser': {
-            'nick_name': blog.masuser.nick_name,
-        }
+        'masuser': blog.masuser.toJSON(),
     }
     masLogger.log(request, 666)
     return utils.SuccessResponse(json)

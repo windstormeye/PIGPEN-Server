@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'comment',
     'read_statistics',
     'like_statistics',
+    'user_avatar',
 ]
 
 MIDDLEWARE = [
@@ -232,3 +233,6 @@ CACHES = {
         'LOCATION': 'masuser_token_cache_table',
     }
 }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

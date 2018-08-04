@@ -79,13 +79,9 @@ def get_like_blog(request):
         blog = Blog.objects.get(pk=like.object_id)
 
         l = {
-            'blog': {
-                'masuser': {
-                    'nick_name': like.masuser.nick_name,
-                },
-                'content': blog.content,
-                'created_time': blog.created_time.timestamp()
-            },
+            'masuser': masuser.toJSON(),
+            'content': blog.content,
+            'created_time': blog.created_time.timestamp()
         }
         final_likes.append(l)
     json = {

@@ -1,6 +1,5 @@
 from django.core.validators import RegexValidator
 from django.db import models
-from django.contrib.auth.models import User
 
 
 class MasUser(models.Model):
@@ -16,5 +15,14 @@ class MasUser(models.Model):
     last_updated_time = models.DateTimeField(auto_now=True)
 
     def toJSON(self):
-        import json
-        return json.dumps(dict([(attr, getattr(self, attr)) for attr in [f.name for f in self._meta.fields]]))
+        from user_avatar.models import UserAvatar
+        json = {
+            'nick_nick': self.nick_name,
+            'slogan': self.slogan,
+            'work_mes': self.work_mes,
+            'interest_mes': self.interest_mes,
+            'travel_mes': self.travel_mes,
+            'avatar': UserAvatar.objects.get(masuser=self).avatar.path,
+            'created_time': self.created_time.timestamp(),
+        }
+        return json

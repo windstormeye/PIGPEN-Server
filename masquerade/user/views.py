@@ -1,5 +1,6 @@
 import hashlib, time
 from .models import MasUser
+from user_avatar.models import UserAvatar
 from common import token_utils, utils, decorator, masLogger
 
 
@@ -22,14 +23,7 @@ def create_masuser(request):
         token = token_utils.create_token(username)
         json = {
             'masuser_id': masuser.pk,
-            'masuser': {
-                'nick_nick': masuser.nick_name,
-                'slogan': masuser.slogan,
-                'work_mes': masuser.work_mes,
-                'interest_mes': masuser.interest_mes,
-                'travel_mes': masuser.travel_mes,
-                'created_time': masuser.created_time.timestamp(),
-            },
+            'masuser': masuser.toJSON(),
             'token': token,
         }
         masLogger.log(request, 666)
@@ -61,15 +55,7 @@ def login(request):
             if not token:
                 token = token_utils.create_token(username)
                 json = {
-                    'masuser': {
-                        'masuser_id': masuser.id,
-                        'username': masuser.nick_name,
-                        'slogan': masuser.slogan,
-                        'work_mes': masuser.work_mes,
-                        'interest_mes': masuser.interest_mes,
-                        'travel_mes': masuser.travel_mes,
-                        'created_time': masuser.created_time.timestamp(),
-                    },
+                    'masuser': masuser.toJSON(),
                     'token': token,
                 }
                 masLogger.log(request, 666)
@@ -106,13 +92,7 @@ def get_user_details(request):
     masuser = MasUser.objects.get(pk=masuser_id)
 
     json = {
-        'masuser_id': masuser.pk,
-        'nick_name': masuser.nick_name,
-        'slogan': masuser.slogan,
-        'work_mes': masuser.work_mes,
-        'interest_mes': masuser.interest_mes,
-        'travel_mes': masuser.travel_mes,
-        'created_time': masuser.created_time.timestamp(),
+        'masuser': masuser.toJSON()
     }
 
     masLogger.log(request, 666)
@@ -133,13 +113,7 @@ def update_user(request):
                                                  travel_mes=travel_mes, nick_name=nick_name)
     masuser = MasUser.objects.get(pk=masuser_pk)
     json = {
-        'masuser_id': masuser.pk,
-        'nick_name': masuser.nick_name,
-        'slogan': masuser.slogan,
-        'work_mes': masuser.work_mes,
-        'interest_mes': masuser.interest_mes,
-        'travel_mes': masuser.travel_mes,
-        'created_time': masuser.created_time.timestamp(),
+        'masuser': masuser.toJSON()
     }
 
     masLogger.log(request, 666)
