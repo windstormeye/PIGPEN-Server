@@ -68,12 +68,15 @@ def like_change(request):
 
 
 @decorator.request_methon('GET')
-@decorator.request_check_args([])
+@decorator.request_check_args(['page'])
 def get_like_blog(request):
-    masuser_id = request.GET.get('masuser_id', '')
+    masuser_id = request.GET.get('masuser_id')
+    page_num = request.GET.get('page')
 
     masuser = MasUser.objects.get(pk=masuser_id)
-    like_records = LikeRecord.objects.filter(masuser=masuser)
+    likes = LikeRecord.objects.filter(masuser=masuser)
+
+    like_records = utils.get_page_blog_list(likes, page_num)
     final_likes = []
     for like in like_records:
         blog = Blog.objects.get(pk=like.object_id)

@@ -26,16 +26,14 @@ def create_blog(request):
 
 
 @decorator.request_methon('GET')
-@decorator.request_check_args([])
+@decorator.request_check_args(['page'])
 def blog_list(request):
-    blogs = Blog.objects.all().values()
+    page_num = request.GET.get('page')
+    blogs = utils.get_page_blog_list(Blog.objects.all().values(), page_num)
     final_blogs = []
     for blog in blogs:
         masuserId = blog['masuser_id']
         masuser = MasUser.objects.get(pk=masuserId)
-        masuser_json = {
-            'nick_name': masuser.nick_name,
-        }
         # replace field `masuser`
         blog['masuser'] = masuser.toJSON()
 
@@ -72,11 +70,12 @@ def delete_blog(request):
 
 
 @decorator.request_methon('GET')
-@decorator.request_check_args([])
+@decorator.request_check_args(['page'])
 def get_user_blog(request):
-    userId = request.GET.get('masuser_id', '')
+    userId = request.GET.get('masuser_id')
+    page_num = request.GET.get('page')
 
-    blogs = Blog.objects.filter(masuser__pk=userId)
+    blogs = utils.get_page_blog_list(Blog.objects.filter(masuser__pk=userId), page_num)
     final_blogs = []
     for blog in blogs:
         b = {

@@ -35,20 +35,23 @@ def create_comment(request):
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['content_type', 'content_id'])
+@decorator.request_check_args(['content_type', 'content_id', 'page'])
 def get_comment(request):
-    contentType = request.POST.get('content_type', '')
-    content_id = request.POST.get('content_id', '')
+    contentType = request.POST.get('content_type')
+    content_id = request.POST.get('content_id')
+    page_num = request.POST.get('page')
 
     content_type = ContentType.objects.get(model=contentType)
-    parent_comments = Comment.objects.filter(content_type=content_type, object_id=content_id, parent=None)
+    comments = Comment.objects.filter(content_type=content_type, object_id=content_id, parent=None)
+    parent_comments = utils.get_page_blog_list(comments, page_num)
     final_comments = []
 
     for comment in parent_comments:
         # get child comment
+        # MARK: do paginator
         child_comments = Comment.objects.filter(content_type=content_type, object_id=content_id, root=comment).order_by('comment_time')
         child_final_comments = []
-        if child_comments.exists():
+        if child_comments:
             for c_m in child_comments:
                 reply_to = c_m.parent.masuser.nick_name
                 cc = {
