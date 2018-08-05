@@ -18,7 +18,7 @@ def upload_avatar(request):
 
             json = {
                 'masuser_id': masuser_id,
-                'avatar': user_avatar.avatar.path,
+                'avatar': user_avatar.avatar.url,
             }
 
             masLogger.log(request, 666)
@@ -51,7 +51,7 @@ def update_avatar(request):
 
             json = {
                 'masuser_id': masuser_id,
-                'avatar': new_avatar.avatar.path,
+                'avatar': new_avatar.avatar.url,
             }
             masLogger.log(request, 666)
             return utils.SuccessResponse(json)

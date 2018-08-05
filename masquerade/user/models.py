@@ -16,13 +16,17 @@ class MasUser(models.Model):
 
     def toJSON(self):
         from user_avatar.models import UserAvatar
+        if UserAvatar.objects.filter(masuser=self).exists():
+            avatar_path = UserAvatar.objects.get(masuser=self).avatar.url
+        else:
+            avatar_path = ''
         json = {
             'nick_nick': self.nick_name,
             'slogan': self.slogan,
             'work_mes': self.work_mes,
             'interest_mes': self.interest_mes,
             'travel_mes': self.travel_mes,
-            'avatar': UserAvatar.objects.get(masuser=self).avatar.path,
+            'avatar': avatar_path,
             'created_time': self.created_time.timestamp(),
         }
         return json

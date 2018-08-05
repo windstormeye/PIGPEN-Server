@@ -1,5 +1,6 @@
 # pycharm files
 .idea
+media/
 
 # macOS files
 */.DS_Store
