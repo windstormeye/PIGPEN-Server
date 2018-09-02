@@ -16,6 +16,7 @@ def like_change(request):
 
     masuser = MasUser.objects.get(pk=masuser_id)
 
+
     # is_blog
     try:
         content_type = ContentType.objects.get(model=content_type)

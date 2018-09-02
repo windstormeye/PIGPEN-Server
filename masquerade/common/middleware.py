@@ -12,7 +12,6 @@ class tokenCheckMiddleware(MiddlewareMixin):
             timestamp = request.META.get('HTTP_TIMESTAMP')
 
             if token and timestamp:
-                # valid within 5 minutes
                 now_timestamp = time.time() / 300
                 if (int(int(timestamp) + 300)) > now_timestamp:
                     username = token_utils.get_username(token)

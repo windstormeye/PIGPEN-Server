@@ -1,6 +1,5 @@
 import hashlib, time
 from .models import MasUser
-from user_avatar.models import UserAvatar
 from common import token_utils, utils, decorator, masLogger
 
 
