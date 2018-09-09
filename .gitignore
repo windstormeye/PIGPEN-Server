@@ -1,6 +1,6 @@
 # pycharm files
 .idea
-./masquerade/media/avatar/
+masquerade/media/avatar/
 
 # macOS files
 */.DS_Store

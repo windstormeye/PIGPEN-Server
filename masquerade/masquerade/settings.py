@@ -86,6 +86,7 @@ DATABASES = {
         'PASSWORD': 'masquerade_2018',
         'HOST': '',
         'PORT': '3306',
+        'ATOMIC_REQUESTS': True,
     }
 }
 
