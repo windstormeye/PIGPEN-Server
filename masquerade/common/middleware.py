@@ -13,7 +13,7 @@ class tokenCheckMiddleware(MiddlewareMixin):
 
             if token and timestamp:
                 now_timestamp = (time.time() + 300) / 300
-                if int(timestamp) > now_timestamp:
+                if int(timestamp) < now_timestamp:
                     username = token_utils.get_username(token)
                     if token == token_utils.get_token(username):
                         pass

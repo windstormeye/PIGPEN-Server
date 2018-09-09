@@ -6,7 +6,7 @@ from django.core.cache import cache
 HEADER = {'typ': 'JWP', 'alg': 'default'}
 KEY = 'masquerade_2018'
 SALT = 'masquerade_2018_2333'
-TIME_OUT = 24 * 60 * 60  # 30min
+TIME_OUT = 24 * 60 * 60    # 24h
 
 
 def encrypt(obj):
