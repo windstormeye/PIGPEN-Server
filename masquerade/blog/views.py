@@ -29,7 +29,7 @@ def create_blog(request):
 @decorator.request_check_args(['page'])
 def blog_list(request):
     page_num = request.GET.get('page')
-    blogs = utils.get_page_blog_list(Blog.objects.all().values(), page_num)
+    blogs = utils.get_page_blog_list(Blog.objects.filter(is_deleted=0).values(), page_num)
     final_blogs = []
     for blog in blogs:
         masuserId = blog['masuser_id']
@@ -60,10 +60,15 @@ def delete_blog(request):
     blog = Blog.objects.get(pk=blog_id)
     # 记得string to int
     if blog.masuser.pk == int(masuser_id):
-        Blog.objects.filter(pk=blog_id).delete()
+        findBlog = Blog.objects.get(pk=blog_id)
+        if findBlog.is_deleted == 0:
+            findBlog.delete()
+            masLogger.log(request, 666, '删除成功')
+            return utils.SuccessResponse('删除成功')
+        else:
+            masLogger.log(request, 2333, '删除失败，文章不存在')
+            return utils.ErrorResponse(2333, '删除失败，文章不存在')
 
-        masLogger.log(request, 666, '删除成功')
-        return utils.SuccessResponse('删除成功')
     else:
         masLogger.log(request, 2333, '删除失败，只能删除自己发布的文章')
         return utils.ErrorResponse(2333, '删除失败，只能删除自己发布的文章')
