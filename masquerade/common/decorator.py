@@ -31,7 +31,6 @@ def request_check_args(args=None):
             else:
                 request_args = request.GET.dict().keys()
             # allow multi-args
-            args.append('masuser_id')
             args.append('nick_name')
             for item in args:
                 if item not in request_args:

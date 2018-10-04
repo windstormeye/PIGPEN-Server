@@ -25,7 +25,8 @@ SECRET_KEY = '#1i(0ib4%%7&ce5q7r^*vujik=40t1^o)9t5(^1sdpqv$sh7$='
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1'
+    '127.0.0.1',
+    'pjpjpjpj.free.idcfengye.com'
 ]
 
 # Application definition
