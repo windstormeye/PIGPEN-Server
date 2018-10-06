@@ -4,19 +4,23 @@ from common import token_utils, utils, decorator, masLogger
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['username', 'password', 'timestamp'])
+@decorator.request_check_args(['username', 'password', 'avatar', 'gender'])
 def create_masuser(request):
-    username = request.POST.get('username', '')
+    username = request.POST.get('username')
     # password is a hash_str
-    password = request.POST.get('password', '')
-    timestamp = request.POST.get('timestamp', '')
+    password = request.POST.get('password')
+    timestamp = request.POST.get('timestamp')
+    nick_name = request.POST.get('nick_name')
+    avatar = request.POST.get('avatar')
+    gender = request.POST.get('gender')
 
     # valid within 5 minutes
     now_timestamp = time.time() / 300
     if (int(int(timestamp) + 300)) > now_timestamp:
 
         # User'password is another hash_str
-        masuser = MasUser(username=username, password=password)
+        masuser = MasUser(username=username, password=password, avatar=avatar,
+                          nick_name=nick_name, gender=gender)
         masuser.save()
 
         token = token_utils.create_token(username)
