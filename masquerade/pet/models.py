@@ -39,5 +39,4 @@ class Pet(models.Model):
             'created_time': self.created_time.timestamp(),
             'avatar_path': avatar_path,
         }
-
         return json

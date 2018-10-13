@@ -10,7 +10,7 @@ def create_masuser(request):
     # password is a hash_str
     password = request.POST.get('password')
     timestamp = request.POST.get('timestamp')
-    nick_name = request.POST.get('nick_name')
+    nick_name = request.POST.get('user_nick_name')
     avatar = request.POST.get('avatar')
     gender = request.POST.get('gender')
 

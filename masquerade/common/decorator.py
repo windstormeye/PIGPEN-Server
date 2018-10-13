@@ -31,7 +31,7 @@ def request_check_args(args=None):
             else:
                 request_args = request.GET.dict().keys()
             # allow multi-args
-            args.append('nick_name')
+            args.append('user_nick_name')
             for item in args:
                 if item not in request_args:
                     return utils.ErrorResponse(1002, '参数错误')

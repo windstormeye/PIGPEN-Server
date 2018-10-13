@@ -26,7 +26,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    'pjpjpjpj.free.idcfengye.com'
 ]
 
 # Application definition
@@ -46,6 +45,7 @@ INSTALLED_APPS = [
     'user_avatar',
     'pet_avatar',
     'pet',
+    'virtual_pet',
 ]
 
 MIDDLEWARE = [
