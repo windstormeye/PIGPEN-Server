@@ -1,19 +1,19 @@
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.conf import settings
+from common import masLogger
 
 
-def ErrorResponse(code, message):
-    data = {}
-    data['msgCode'] = code
-    data['msg'] = message
+def ErrorResponse(code, message, request):
+    data = {'msgCode': code, 'msg': message}
+    masLogger.log(request, 2333, message)
     return JsonResponse(data)
 
 
-def SuccessResponse(message):
-    data = {}
-    data['msgCode'] = '666'
-    data['msg'] = message
+# 成功响应
+def SuccessResponse(message, request):
+    data = {'msgCode': 666, 'msg': message}
+    masLogger.log(request, 666)
     return JsonResponse(data)
 
 

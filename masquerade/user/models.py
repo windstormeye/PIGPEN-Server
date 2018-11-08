@@ -24,6 +24,7 @@ class MasUser(models.Model):
         # else:
         #     avatar_path = ''
         json = {
+            'id': self.pk,
             'nick_name': self.nick_name,
             'avatar': self.avatar,
             'gender': self.gender,

@@ -25,15 +25,12 @@ def create_masuser(request):
 
         token = token_utils.create_token(username)
         json = {
-            'masuser_id': masuser.pk,
             'masuser': masuser.toJSON(),
             'token': token,
         }
-        masLogger.log(request, 666)
-        return utils.SuccessResponse(json)
+        return utils.SuccessResponse(json, request)
     else:
-        masLogger.log(request, 2333, '已超时')
-        return utils.ErrorResponse('2333', '已超时')
+        return utils.ErrorResponse('2333', '已超时', request)
 
 
 @decorator.request_methon('POST')
@@ -60,17 +57,13 @@ def login(request):
                     'masuser': masuser.toJSON(),
                     'token': token,
                 }
-                masLogger.log(request, 666)
-                return utils.SuccessResponse(json)
+                return utils.SuccessResponse(json, request)
             else:
-                masLogger.log(request, 2333, '密码错误')
-                return utils.ErrorResponse(2333, '密码错误')
+                return utils.ErrorResponse(2333, '密码错误', request)
         else:
-            masLogger.log(request, 2333, '用户不存在')
-            return utils.ErrorResponse(2333, '用户不存在')
+            return utils.ErrorResponse(2333, '用户不存在', request)
     else:
-        masLogger.log(request, 2333, '已超时')
-        return utils.ErrorResponse(2333, '已超时')
+        return utils.ErrorResponse(2333, '已超时', request)
 
 
 @decorator.request_methon('GET')
@@ -81,9 +74,7 @@ def logout(request):
     json = {
         'isLogOut': 'true'
     }
-
-    masLogger.log(request, 666)
-    return utils.SuccessResponse(json)
+    return utils.SuccessResponse(json, request)
 
 
 @decorator.request_methon('POST')
@@ -96,12 +87,9 @@ def get_user_details(request):
         json = {
             'masUser': user.toJSON()
         }
-
-        masLogger.log(request, 666)
-        return utils.SuccessResponse(json)
+        return utils.SuccessResponse(json, request)
     else:
-        masLogger.log(request, 2333, '用户不存在')
-        return utils.ErrorResponse(2333, '用户不存在')
+        return utils.ErrorResponse(2333, '用户不存在', request)
 
 
 @decorator.request_methon('POST')
@@ -111,19 +99,16 @@ def update_user(request):
     avatar = request.POST.get('avatar')
     gender = request.POST.get('gender')
 
-    user = MasUser.objects.filter(nick_name=nick_name).update(avatar=avatar,
-                                                              gender=gender).first()
+    user = MasUser.objects.filter(nick_name=nick_name)\
+        .update(avatar=avatar, gender=gender).first()
 
     if user:
         json = {
             'masUser': user.toJSON()
         }
-
-        masLogger.log(request, 666)
-        return utils.SuccessResponse(json)
+        return utils.SuccessResponse(json, request)
     else:
-        masLogger.log(request, 2333, '用户不存在')
-        return utils.ErrorResponse(2333, '用户不存在')
+        return utils.ErrorResponse(2333, '用户不存在', request)
 
 
 @decorator.request_methon('GET')
@@ -136,9 +121,7 @@ def update_token(request):
     json = {
         'token': token,
     }
-
-    masLogger.log(request, 666)
-    return utils.SuccessResponse(json)
+    return utils.SuccessResponse(json, request)
 
 
 @decorator.request_methon('GET')
@@ -155,5 +138,4 @@ def check_phone(request):
         json = {
             'status': '可注册'
         }
-        masLogger.log(request, 666)
-        return utils.SuccessResponse(json)
+        return utils.SuccessResponse(json, request)

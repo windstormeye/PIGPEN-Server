@@ -14,6 +14,10 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# 狗品种
+DOG_BREED_DIR = BASE_DIR + '/pet/dog_breed.txt'
+# 猫品种
+CAT_BREED_DIR = BASE_DIR + '/pet/cat_breed.txt'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
@@ -84,9 +88,9 @@ WSGI_APPLICATION = 'masquerade.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mas_db',
-        'USER': 'masquerade',
-        'PASSWORD': 'masquerade_2018',
+        'NAME': 'pigpen',
+        'USER': 'pigpen',
+        'PASSWORD': 'pigpen_2018',
         'HOST': '',
         'PORT': '3306',
         'ATOMIC_REQUESTS': True,

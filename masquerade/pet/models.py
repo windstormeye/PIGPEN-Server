@@ -40,3 +40,15 @@ class Pet(models.Model):
             'avatar_path': avatar_path,
         }
         return json
+
+
+class dog_breed(models.Model):
+    zh_name = models.CharField(max_length=50)
+
+
+class cat_breed(models.Model):
+    zh_name = models.CharField(max_length=50)
+
+
+
+

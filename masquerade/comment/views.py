@@ -13,7 +13,6 @@ def create_comment(request):
     content_id = request.POST.get('content_id', '')
 
     masuser = MasUser.objects.get(pk=masuserId)
-
     model_class = ContentType.objects.get(model=content_type).model_class()
     model_obj = model_class.objects.get(pk=content_id)
     comment = Comment(text=text, masuser=masuser, content_object=model_obj)
@@ -29,9 +28,7 @@ def create_comment(request):
             else:
                 comment.root = parent
     comment.save()
-
-    masLogger.log(request, 666, '评论发布成功')
-    return utils.SuccessResponse('评论发布成功')
+    return utils.SuccessResponse('评论发布成功', request)
 
 
 @decorator.request_methon('POST')
@@ -42,14 +39,18 @@ def get_comment(request):
     page_num = request.POST.get('page')
 
     content_type = ContentType.objects.get(model=contentType)
-    comments = Comment.objects.filter(content_type=content_type, object_id=content_id, parent=None)
+    comments = Comment.objects.filter(content_type=content_type,
+                                      object_id=content_id, parent=None)
     parent_comments = utils.get_page_blog_list(comments, page_num)
     final_comments = []
 
     for comment in parent_comments:
         # get child comment
         # MARK: do paginator
-        child_comments = Comment.objects.filter(content_type=content_type, object_id=content_id, root=comment).order_by('comment_time')
+        child_comments = Comment.objects.filter(content_type=content_type,
+                                                object_id=content_id,
+                                                root=comment)\
+            .order_by('comment_time')
         child_final_comments = []
         if child_comments:
             for c_m in child_comments:
@@ -77,8 +78,7 @@ def get_comment(request):
     json = {
         'comments': list(final_comments)
     }
-    masLogger.log(request, 666)
-    return utils.SuccessResponse(json)
+    return utils.SuccessResponse(json, request)
 
 
 @decorator.request_methon('POST')
@@ -90,7 +90,7 @@ def delete_comment(request):
 
     content_type = ContentType.objects.get(model=contentType)
     masuser = MasUser.objects.get(pk=masuser_id)
-    Comment.objects.filter(content_type=content_type, pk=content_id, masuser=masuser).delete()
-
-    masLogger.log(request, 666, '删除成功')
-    return utils.SuccessResponse('删除成功')
+    Comment.objects.filter(content_type=content_type,
+                           pk=content_id,
+                           masuser=masuser).delete()
+    return utils.SuccessResponse('删除成功', request)
