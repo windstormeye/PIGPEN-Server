@@ -9,28 +9,22 @@ def create_masuser(request):
     username = request.POST.get('username')
     # password is a hash_str
     password = request.POST.get('password')
-    timestamp = request.POST.get('timestamp')
-    nick_name = request.POST.get('user_nick_name')
+    nick_name = request.POST.get('nick_name')
     avatar = request.POST.get('avatar')
     gender = request.POST.get('gender')
 
-    # valid within 5 minutes
-    now_timestamp = time.time() / 300
-    if (int(int(timestamp) + 300)) > now_timestamp:
+    # User'password is another hash_str
+    masuser = MasUser(username=username, password=password, avatar=avatar,
+                      nick_name=nick_name, gender=gender)
+    masuser.save()
 
-        # User'password is another hash_str
-        masuser = MasUser(username=username, password=password, avatar=avatar,
-                          nick_name=nick_name, gender=gender)
-        masuser.save()
-
-        token = token_utils.create_token(username)
-        json = {
-            'masuser': masuser.toJSON(),
-            'token': token,
-        }
-        return utils.SuccessResponse(json, request)
-    else:
-        return utils.ErrorResponse('2333', '已超时', request)
+    token = token_utils.create_token(username)
+    json = {
+        'masuser': masuser.toJSON(),
+        'token': token,
+    }
+    print(json)
+    return utils.SuccessResponse(json, request)
 
 
 @decorator.request_methon('POST')

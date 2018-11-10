@@ -43,10 +43,12 @@ class Pet(models.Model):
 
 
 class dog_breed(models.Model):
+    group = models.CharField(max_length=2)
     zh_name = models.CharField(max_length=50)
 
 
 class cat_breed(models.Model):
+    group = models.CharField(max_length=2)
     zh_name = models.CharField(max_length=50)
 
 

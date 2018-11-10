@@ -2,6 +2,9 @@
 .idea
 masquerade/media
 
+# redis
+dump.rdb
+
 # macOS files
 */.DS_Store
 
