@@ -22,7 +22,6 @@ urlpatterns = [
     path('blog/', include('blog.urls')),
     path('comment/', include('comment.urls')),
     path('like/', include('like_statistics.urls')),
-    path('userAvatar/', include('user_avatar.urls')),
     path('realPet/', include('pet.urls')),
     path('virtualPet/', include('virtual_pet.urls')),
 ]

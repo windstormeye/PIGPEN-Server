@@ -4,30 +4,34 @@ from common import token_utils, utils
 
 
 class tokenCheckMiddleware(MiddlewareMixin):
-    def process_request(self, request):
+    """
+    Process header parameters data from GET and POST request.
+    """
+    @staticmethod
+    def process_request(request):
         timestamp = request.META.get('HTTP_TIMESTAMP')
-        token = request.META.get('HTTP_USERTOKEN')
-        if timestamp is not None and token is not None:
+        if timestamp:
             now_timestamp = (time.time() - 300) / 300
             if int(timestamp) >= now_timestamp:
+                # 这三个 API 不需要 token 验证
                 if request.path != '/masuser/createmasuser' and \
                         request.path != '/masuser/login' and \
                         request.path != '/masuser/updateToken' and \
                         request.path != '/masuser/checkPhone':
+                    token = request.META.get('HTTP_USERTOKEN')
                     if token:
                         username = token_utils.get_username(token)
                         if token != token_utils.get_token(username):
-                            return utils.ErrorResponse(1001,
-                                                       'token失效，请更新',
+                            return utils.ErrorResponse(1001, 'invalid token',
                                                        request)
                     else:
-                        return utils.ErrorResponse(1001,
-                                                   'token失效，请更新',
+                        return utils.ErrorResponse(1002, 'require token',
                                                    request)
             else:
-                return utils.ErrorResponse(2333, '已超时', request)
+                return utils.ErrorResponse(2333, 'timeout', request)
         else:
-            return utils.ErrorResponse(1002, '参数错误', request)
+            return utils.ErrorResponse(1002, 'require timestamp', request)
 
-    def process_response(self, request, response):
+    @staticmethod
+    def process_response(request, response):
         return response

@@ -13,8 +13,7 @@ def create_virtual_pet(request):
     user_nick_name = request.POST.get('user_nick_name')
 
     if virtualPet.objects.filter(nick_name=nick_name).exists():
-        masLogger.log(request, 2333, '宠物昵称已存在')
-        return utils.ErrorResponse(2333, '宠物昵称已存在')
+        return utils.ErrorResponse(2333, '宠物昵称已存在', request)
 
     user = MasUser.objects.filter(nick_name=user_nick_name).first()
     if user:
@@ -35,8 +34,12 @@ def create_virtual_pet(request):
             'virtualPet': virtual_pet.toJSON()
         }
 
-        masLogger.log(request, 666)
-        return utils.SuccessResponse(json)
+        return utils.SuccessResponse(json, request)
     else:
-        masLogger.log(request, 2333, '用户不存在')
-        return utils.ErrorResponse(2333, '用户不存在')
+        return utils.ErrorResponse(2333, '用户不存在', request)
+
+
+@decorator.request_methon('POST')
+@decorator.request_check_args([])
+def getVirtualPets(request):
+    pass

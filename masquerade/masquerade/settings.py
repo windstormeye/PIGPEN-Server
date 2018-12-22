@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'comment',
     'read_statistics',
     'like_statistics',
-    'user_avatar',
     'pet_avatar',
     'pet',
     'virtual_pet',
