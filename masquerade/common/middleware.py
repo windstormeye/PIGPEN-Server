@@ -13,7 +13,6 @@ class tokenCheckMiddleware(MiddlewareMixin):
         if timestamp:
             now_timestamp = (time.time() - 300) / 300
             if int(timestamp) >= now_timestamp:
-                # 这三个 API 不需要 token 验证
                 if request.path != '/masuser/createmasuser' and \
                         request.path != '/masuser/login' and \
                         request.path != '/masuser/updateToken' and \
