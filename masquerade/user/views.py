@@ -1,6 +1,8 @@
 import hashlib
 from .models import MasUser
 from common import token_utils, utils, decorator, masLogger
+from virtual_pet.models import virtualPet
+from pet.models import Pet
 
 
 @decorator.request_methon('POST')
@@ -13,37 +15,51 @@ def create_masuser(request):
     avatar = request.POST.get('avatar')
     gender = request.POST.get('gender')
 
-    # User'password is another hash_str
+    if MasUser.objects.filter(phone_number=phone_number).exists():
+        return utils.ErrorResponse(2333, 'user exist', request)
+
     masuser = MasUser.create(phone_number=phone_number, password=password,
                              avatar=avatar, nick_name=nick_name, gender=gender)
     token = token_utils.create_token(masuser.uid)
     json = {
         'masuser': masuser.toJSON(),
         'token': token,
+        # 刚注册用户肯定都没有宠物和虚拟宠物
+        'feeding_status': [0, 0, 0]
     }
-    print(json)
+
     return utils.SuccessResponse(json, request)
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['sign', 'timestamp'])
+@decorator.request_check_args(['sign', 'timestamp', 'phoneNumber'])
 def login(request):
-    uid = request.POST.get('uid')
+    phone_number = request.POST.get('phoneNumber')
     sign = request.POST.get('sign')
     timestamp = request.POST.get('timestamp')
 
-    masuser = MasUser.objects.filter(uid=uid).first()
+    masuser = MasUser.objects.filter(phone_number=phone_number).first()
     if masuser:
         md5 = hashlib.md5()
         md5.update((masuser.password + timestamp).encode('utf-8'))
         masuser_password_hash = md5.hexdigest()
 
         if sign == masuser_password_hash:
+            token = token_utils.create_token(masuser.uid)
 
-            token = token_utils.create_token(uid)
+            # 喂养状态
+            feeding_status = [0, 0, 0]
+            if virtualPet.objects.filter(user=masuser).exists():
+                feeding_status.insert(2, 1)
+            if Pet.objects.filter(user=masuser, pet_type='dog').exists():
+                feeding_status.insert(1, 1)
+            if Pet.objects.filter(user=masuser, pet_type='cat').exists():
+                feeding_status.insert(0, 1)
+
             json = {
                 'masuser': masuser.toJSON(),
                 'token': token,
+                'feeding_status': feeding_status
             }
             return utils.SuccessResponse(json, request)
         else:
@@ -63,19 +79,56 @@ def logout(request):
     return utils.SuccessResponse(json, request)
 
 
+# 获取用户宠物信息
 @decorator.request_methon('GET')
-@decorator.request_check_args(['uid'])
-def get_user_details(request):
-    nick_name = request.GET.get('uid')
+@decorator.request_check_args([])
+def get_user_pet_info(request):
+    uid = request.GET.get('uid')
 
-    user = MasUser.objects.filter(nick_name=nick_name).first()
+    # 获取真实宠物信息
+    real_pet_array = []
+    real_pets = Pet.objects.filter(user__uid=uid)
+    for real_pet in real_pets:
+        real_pet_array.append(real_pet.toJSON())
+
+    # 获取虚拟宠物信息
+    virtual_pet_array = []
+    virtual_pets = virtualPet.objects.filter(user__uid=uid)
+    for virtual_pet in virtual_pets:
+        virtual_pet_array.append(virtual_pet.toJSON())
+
+    json = {
+        'real_pet': real_pet_array,
+        'virtual_pet': virtual_pet_array
+    }
+
+    return utils.SuccessResponse(json, request)
+
+
+# 获取用户简单信息
+@decorator.request_methon('GET')
+@decorator.request_check_args(['details_uid'])
+def get_user_details(request):
+    details_uid = request.GET.get('details_uid')
+
+    user = MasUser.objects.filter(uid=details_uid).first()
     if user:
+        # 喂养状态
+        feeding_status = [0, 0, 0]
+        if virtualPet.objects.filter(user=user).exists():
+            feeding_status.insert(2, 1)
+        if Pet.objects.filter(user=user, pet_type='dog').exists():
+            feeding_status.insert(1, 1)
+        if Pet.objects.filter(user=user, pet_type='cat').exists():
+            feeding_status.insert(0, 1)
+
         json = {
-            'masUser': user.toJSON()
+            'masuser': user.toJSON(),
+            'feeding_status': feeding_status,
         }
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse(2333, '用户不存在', request)
+        return utils.ErrorResponse(2333, 'user not exist', request)
 
 
 @decorator.request_methon('POST')
@@ -90,7 +143,7 @@ def update_user(request):
 
     if user:
         json = {
-            'masUser': user.toJSON()
+            'masuser': user.toJSON()
         }
         return utils.SuccessResponse(json, request)
     else:

@@ -9,4 +9,5 @@ urlpatterns = [
     path('updateToken', views.update_token, name='update_token'),
     path('getUserDetails', views.get_user_details, name='get_user_details'),
     path('checkPhone', views.check_phone, name='check_user_phone'),
+    path('pets', views.get_user_pet_info, name='get_user_pet_info'),
 ]

@@ -1,41 +1,46 @@
 import pinyin
+from django.conf import settings
 from common import decorator, masLogger
 from user.models import MasUser
 from common import utils
 from .models import Pet, dog_breed, cat_breed
-from django.conf import settings
+from relationship.models import PetRelationship
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['nick_name', 'gender', 'pet_type', 'birth_time',
-                               'weight', 'ppp_status', 'love_status',
-                               'family_relation', 'user_nick_name'])
+@decorator.request_check_args(['pet_nick_name', 'gender', 'pet_type',
+                               'birth_time', 'weight', 'ppp_status',
+                               'love_status', 'relation_code'])
 def create_pet(request):
-    nick_name = request.POST.get('nick_name', '')
+    pet_nick_name = request.POST.get('pet_nick_name', '')
     gender = request.POST.get('gender', '')
     pet_type = request.POST.get('pet_type', '')
     birth_time = request.POST.get('birth_time', '')
     weight = request.POST.get('weight', '')
     ppp_status = request.POST.get('ppp_status', '')
     love_status = request.POST.get('love_status', '')
-    family_relation = request.POST.get('family_relation', '')
-    user_nick_name = request.POST.get('user_nick_name', '')
+    relation_code = request.POST.get('relation_code', -1)
+    uid = request.POST.get('uid', '')
 
-    user = MasUser.objects.filter(nick_name=user_nick_name)
-
+    user = MasUser.objects.filter(uid=uid)
     if user:
-        pet = Pet(nick_name=nick_name, gender=gender, pet_type=pet_type,
-                  weight=weight, birth_time=birth_time, ppp_status=ppp_status,
-                  love_status=love_status, family_relation=family_relation)
-        pet.save()
+        # 宠物实体
+        pet = Pet.create(nick_name=pet_nick_name, gender=gender,
+                         pet_type=pet_type, weight=weight,
+                         birth_time=birth_time, love_status=love_status,
+                         ppp_status=ppp_status, user=user)
+        # 宠物关系实体
+        relation = PetRelationship(pet_id=pet.pet_id, uid=uid,
+                                   relationship_code=relation_code)
 
         json = {
             'pet': pet.toJSON(),
+            'relationship': relation.relationship_code,
         }
         masLogger.log(request, 666)
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse('2333', '用户不存在', request)
+        return utils.ErrorResponse('2333', 'user not exist', request)
 
 
 @decorator.request_methon('GET')

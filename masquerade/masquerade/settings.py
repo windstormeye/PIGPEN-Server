@@ -46,9 +46,9 @@ INSTALLED_APPS = [
     'comment',
     'read_statistics',
     'like_statistics',
-    'pet_avatar',
     'pet',
     'virtual_pet',
+    'relationship',
 ]
 
 MIDDLEWARE = [

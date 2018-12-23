@@ -8,19 +8,34 @@ class virtualPet(models.Model):
     gender = models.IntegerField()
     # 0 => 法国斗牛犬, 1 => 威尔士柯基, 2 => 威玛猎犬
     breed = models.IntegerField()
-    created_time = models.DateTimeField(auto_now_add=True)
     pet_id = models.CharField(max_length=10, unique=True)
+    created_time = models.DateTimeField(auto_now_add=True)
     last_updated_time = models.DateTimeField(auto_now=True)
 
     user = models.ForeignKey(MasUser, on_delete=models.CASCADE)
 
     def toJSON(self):
         json = {
-            'id': self.pk,
             'nick_name': self.nick_name,
             'gender': self.gender,
             'breed': self.breed,
             'pet_id': self.pet_id,
-            'created_time': self.created_time.timestamp(),
+            'created_time': int(self.created_time.timestamp()),
         }
         return json
+
+    @classmethod
+    def create(cls, user, nick_name='', gender='', breed=''):
+        import shortuuid
+
+        shortuuid.set_alphabet('0123456789')
+        pet_id = shortuuid.random(length=8)
+
+        while True:
+            if virtualPet.objects.filter(pet_id=pet_id).exists():
+                pet_id = shortuuid.random(length=8)
+            else:
+                break
+
+        return cls.objects.create(nick_name=nick_name, gender=int(gender),
+                                  breed=int(breed), user=user, pet_id=pet_id)
