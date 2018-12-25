@@ -1,3 +1,5 @@
+import time
+
 import pinyin
 from django.conf import settings
 from common import decorator, masLogger
@@ -5,6 +7,7 @@ from user.models import MasUser
 from common import utils
 from .models import Pet, dog_breed, cat_breed
 from relationship.models import PetRelationship
+from qiniu import Auth
 
 
 @decorator.request_methon('POST')
@@ -59,6 +62,25 @@ def get_breeds(request):
         return utils.SuccessResponse(json, request)
     else:
         return utils.ErrorResponse('2333', '不支持该物种', request)
+
+
+@decorator.request_methon('GET')
+@decorator.request_check_args([])
+def get_pet_upload_avatar_token(request):
+    uid = request.GET.get('uid')
+    # 构建鉴权对象
+    q = Auth(settings.QINIU_ACCESS_KEY, settings.QINIU_SECRET_KEY)
+    # 要上传的空间
+    bucket_name = 'pigpen'
+    # 上传到七牛后保存的文件名
+    key = 'pet_avatar_' + uid + str(int(time.time()))
+    # 上传策略
+    policy = {}
+    token = q.upload_token(bucket_name, key, 3600, policy)
+    json = {
+        'upload_token': token
+    }
+    return utils.SuccessResponse(json, request)
 
 
 # 获取所有狗品种
