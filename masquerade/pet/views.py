@@ -65,22 +65,38 @@ def get_breeds(request):
 
 
 @decorator.request_methon('GET')
-@decorator.request_check_args([])
+@decorator.request_check_args(['imageCount'])
 def get_pet_upload_avatar_token(request):
+    """
+    七牛不支持多图上传，根据官方文档描述，只能在业务层循环针对每个图生成对应 token
+    :param request: imageCount
+    :return:
+    """
     uid = request.GET.get('uid')
-    # 构建鉴权对象
-    q = Auth(settings.QINIU_ACCESS_KEY, settings.QINIU_SECRET_KEY)
-    # 要上传的空间
-    bucket_name = 'pigpen'
-    # 上传到七牛后保存的文件名
-    key = 'pet_avatar_' + uid + str(int(time.time()))
-    # 上传策略
-    policy = {}
-    token = q.upload_token(bucket_name, key, 3600, policy)
-    json = {
-        'upload_token': token
+    imageCount = int(request.GET.get('imageCount', "1"))
+
+    jsons = []
+    while imageCount > 0:
+        # 构建鉴权对象
+        q = Auth(settings.QINIU_ACCESS_KEY, settings.QINIU_SECRET_KEY)
+        # 要上传的空间
+        bucket_name = 'pigpen'
+        # 上传到七牛后保存的文件名
+        key = 'pet_avatar_' + uid + str(int(time.time())) + str(imageCount)
+        # 上传策略
+        policy = {}
+        token = q.upload_token(bucket_name, key, 3600, policy)
+
+        jsons.append(token)
+        imageCount -= 1
+
+    f_json = {
+        # list 倒置：不写区间范围的话，默认为原list,因此L[:]和L[::]都表示原list。
+        # 根据以上推算，想要倒置list,只需要对原list取负步距-1，即每次回退一个即可得到
+        # from: https://blog.csdn.net/akisayaka/article/details/50042175
+        'upload_tokens': jsons[::-1]
     }
-    return utils.SuccessResponse(json, request)
+    return utils.SuccessResponse(f_json, request)
 
 
 # 获取所有狗品种
