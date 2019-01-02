@@ -1,7 +1,9 @@
+import time
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.conf import settings
 from common import masLogger
+from qiniu import Auth
 
 
 def ErrorResponse(code, message, request):
@@ -12,8 +14,8 @@ def ErrorResponse(code, message, request):
 
 # 成功响应
 def SuccessResponse(message, request):
-    data = {'msgCode': 666, 'msg': message}
-    masLogger.log(request, 666)
+    data = {'msgCode': 0, 'msg': message}
+    masLogger.log(request, 0)
     return JsonResponse(data)
 
 
@@ -22,3 +24,29 @@ def get_page_blog_list(contents, page_num):
     page_of_contents = paginator.get_page(page_num)
 
     return page_of_contents
+
+
+def create_upload_image_token(key, count):
+    """
+    七牛不支持多图上传，根据官方文档描述，只能在业务层循环针对每个图生成对应 token
+    :param count: 需要生成的 token 个数
+    :param key 文件名前缀
+    :return 生成的 token 列表
+    """
+
+    jsons = []
+    while count > 0:
+        # 构建鉴权对象
+        q = Auth(settings.QINIU_ACCESS_KEY, settings.QINIU_SECRET_KEY)
+        # 要上传的空间
+        bucket_name = 'pigpen'
+        # 上传到七牛后保存的文件名
+        image_file_name = key + str(int(time.time())) + str(count)
+        # 上传策略
+        policy = {}
+        token = q.upload_token(bucket_name, image_file_name, 3600, policy)
+
+        jsons.append(token)
+        count -= 1
+
+    return jsons

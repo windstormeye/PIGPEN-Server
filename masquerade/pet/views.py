@@ -1,5 +1,3 @@
-import time
-
 import pinyin
 from django.conf import settings
 from common import decorator, masLogger
@@ -7,7 +5,6 @@ from user.models import MasUser
 from common import utils
 from .models import Pet, dog_breed, cat_breed
 from relationship.models import PetRelationship
-from qiniu import Auth
 
 
 @decorator.request_methon('POST')
@@ -67,28 +64,11 @@ def get_breeds(request):
 @decorator.request_methon('GET')
 @decorator.request_check_args(['imageCount'])
 def get_pet_upload_avatar_token(request):
-    """
-    七牛不支持多图上传，根据官方文档描述，只能在业务层循环针对每个图生成对应 token
-    :param request: imageCount
-    :return:
-    """
     uid = request.GET.get('uid')
     imageCount = int(request.GET.get('imageCount', "1"))
 
-    jsons = []
-    while imageCount > 0:
-        # 构建鉴权对象
-        q = Auth(settings.QINIU_ACCESS_KEY, settings.QINIU_SECRET_KEY)
-        # 要上传的空间
-        bucket_name = 'pigpen'
-        # 上传到七牛后保存的文件名
-        key = 'pet_avatar_' + uid + str(int(time.time())) + str(imageCount)
-        # 上传策略
-        policy = {}
-        token = q.upload_token(bucket_name, key, 3600, policy)
-
-        jsons.append(token)
-        imageCount -= 1
+    key = 'pet_avatar' + uid
+    jsons = utils.create_upload_image_token(key, imageCount)
 
     f_json = {
         # list 倒置：不写区间范围的话，默认为原list,因此L[:]和L[::]都表示原list。
