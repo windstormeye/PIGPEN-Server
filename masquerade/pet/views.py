@@ -67,8 +67,7 @@ def get_pet_upload_avatar_token(request):
     uid = request.GET.get('uid')
     imageCount = int(request.GET.get('imageCount', "1"))
 
-    key = 'pet_avatar' + uid
-    jsons = utils.create_upload_image_token(key, imageCount)
+    jsons = utils.create_upload_image_token(imageCount)
 
     f_json = {
         # list 倒置：不写区间范围的话，默认为原list,因此L[:]和L[::]都表示原list。

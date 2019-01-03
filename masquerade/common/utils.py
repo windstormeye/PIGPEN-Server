@@ -26,7 +26,7 @@ def get_page_blog_list(contents, page_num):
     return page_of_contents
 
 
-def create_upload_image_token(key, count):
+def create_upload_image_token(count):
     """
     七牛不支持多图上传，根据官方文档描述，只能在业务层循环针对每个图生成对应 token
     :param count: 需要生成的 token 个数
@@ -40,11 +40,7 @@ def create_upload_image_token(key, count):
         q = Auth(settings.QINIU_ACCESS_KEY, settings.QINIU_SECRET_KEY)
         # 要上传的空间
         bucket_name = 'pigpen'
-        # 上传到七牛后保存的文件名
-        image_file_name = key + str(int(time.time())) + str(count)
-        # 上传策略
-        policy = {}
-        token = q.upload_token(bucket_name, image_file_name, 3600, policy)
+        token = q.upload_token(bucket_name)
 
         jsons.append(token)
         count -= 1
