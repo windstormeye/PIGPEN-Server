@@ -26,11 +26,11 @@ def get_page_blog_list(contents, page_num):
     return page_of_contents
 
 
-def create_upload_image_token(count):
+def create_upload_image_token(count, key):
     """
     七牛不支持多图上传，根据官方文档描述，只能在业务层循环针对每个图生成对应 token
     :param count: 需要生成的 token 个数
-    :param key 文件名前缀
+    :param key: 文件名前缀
     :return 生成的 token 列表
     """
 
@@ -40,9 +40,35 @@ def create_upload_image_token(count):
         q = Auth(settings.QINIU_ACCESS_KEY, settings.QINIU_SECRET_KEY)
         # 要上传的空间
         bucket_name = 'pigpen'
-        token = q.upload_token(bucket_name)
+        # 文件名
+        k = bucket_name + key + str(int(time.time())) + str(count) + '.jpeg'
+        token = q.upload_token(bucket_name, k)
 
-        jsons.append(token)
+        json = {
+            'img_token': token,
+            'img_key': k
+        }
+
+        jsons.append(json)
         count -= 1
 
     return jsons
+
+
+def create_full_image_url(keys):
+    """
+    拼接获取完成后的图片 url
+    :param keys: 从客户端发送来的 keys，遍历出的每一个 key 代表一个文件名
+    :return image_urls: 返回拼接完成后的图片 url 数组
+    """
+    q = Auth(settings.QINIU_ACCESS_KEY, settings.QINIU_SECRET_KEY)
+    bucket_name = 'pigpenimg.pjhubs.com'
+
+    image_urls = []
+    for index, key in enumerate(keys):
+        base_url = 'http://%s/%s' % (bucket_name, key)
+        private_url = q.private_download_url(base_url, expires=3600)
+
+        image_urls.append(private_url)
+
+    return image_urls

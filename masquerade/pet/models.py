@@ -19,6 +19,10 @@ class Pet(models.Model):
     love_status = models.IntegerField(default=0)
     # 宠物生日
     birth_time = models.CharField(max_length=8)
+    # 宠物品种
+    breed_type = models.CharField(max_length=20)
+    # 宠物每日进食重量
+    food_weight = models.IntegerField(default=0)
     # 宠物头像
     avatar = models.CharField(max_length=100, default='')
     created_time = models.DateTimeField(auto_now_add=True)
@@ -43,7 +47,7 @@ class Pet(models.Model):
 
     @classmethod
     def create(cls, user, nick_name, pet_type, weight, ppp_status, love_status,
-               birth_time, gender):
+               birth_time, gender, breed_type, food_weight):
         import shortuuid
 
         shortuuid.set_alphabet('0123456789')
@@ -57,7 +61,8 @@ class Pet(models.Model):
 
         pet = Pet(nick_name=nick_name, pet_id=pet_id, pet_type=pet_type,
                   weight=weight, ppp_status=ppp_status, love_status=love_status,
-                  birth_time=birth_time, gender=gender, user=user)
+                  birth_time=birth_time, gender=gender, user=user,
+                  breed_type=breed_type, food_weight=food_weight)
         pet.save()
         return pet
 

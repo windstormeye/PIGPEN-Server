@@ -5,12 +5,14 @@ from user.models import MasUser
 from common import utils
 from .models import Pet, dog_breed, cat_breed
 from relationship.models import PetRelationship
+from avatar.models import Avatar
 
 
 @decorator.request_methon('POST')
 @decorator.request_check_args(['pet_nick_name', 'gender', 'pet_type',
                                'birth_time', 'weight', 'ppp_status',
-                               'love_status', 'relation_code'])
+                               'love_status', 'relation_code', 'avatar_key',
+                               'breed_type', 'food_weight'])
 def create_pet(request):
     pet_nick_name = request.POST.get('pet_nick_name', '')
     gender = request.POST.get('gender', '')
@@ -21,6 +23,9 @@ def create_pet(request):
     love_status = request.POST.get('love_status', '')
     relation_code = request.POST.get('relation_code', -1)
     uid = request.POST.get('uid', '')
+    avatar_key = request.POST.get('avatar_key')
+    breed_type = request.POST.get('breed_type')
+    food_weight = request.POST.get('food_weight')
 
     user = MasUser.objects.filter(uid=uid)
     if user:
@@ -28,14 +33,19 @@ def create_pet(request):
         pet = Pet.create(nick_name=pet_nick_name, gender=gender,
                          pet_type=pet_type, weight=weight,
                          birth_time=birth_time, love_status=love_status,
-                         ppp_status=ppp_status, user=user)
+                         ppp_status=ppp_status, user=user,
+                         breed_type=breed_type, food_weight=food_weight)
         # 宠物关系实体
         relation = PetRelationship(pet_id=pet.pet_id, uid=uid,
-                                   relationship_code=relation_code)
+                                   relationship_code=relation_code).save()
+
+        # 宠物头像
+        Avatar(own_id=pet.pet_id, avatar_key=avatar_key).save()
 
         json = {
             'pet': pet.toJSON(),
             'relationship': relation.relationship_code,
+            'avatar_url': utils.create_full_image_url([avatar_key])
         }
         masLogger.log(request, 666)
         return utils.SuccessResponse(json, request)
@@ -64,10 +74,10 @@ def get_breeds(request):
 @decorator.request_methon('GET')
 @decorator.request_check_args(['imageCount'])
 def get_pet_upload_avatar_token(request):
-    uid = request.GET.get('uid')
     imageCount = int(request.GET.get('imageCount', "1"))
 
-    jsons = utils.create_upload_image_token(imageCount)
+    key = 'pet_avatar'
+    jsons = utils.create_upload_image_token(imageCount, key)
 
     f_json = {
         # list 倒置：不写区间范围的话，默认为原list,因此L[:]和L[::]都表示原list。
@@ -76,6 +86,23 @@ def get_pet_upload_avatar_token(request):
         'upload_tokens': jsons[::-1]
     }
     return utils.SuccessResponse(f_json, request)
+
+
+@decorator.request_methon('POST')
+@decorator.request_check_args(['keys'])
+def upload_pet_avatar_key(request):
+    keys = request.POST.get('keys')
+
+    keys_array = keys.split(',')
+
+    if keys:
+        urls = utils.create_full_image_url(keys_array)
+        json = {
+            'image_urls': urls
+        }
+        return utils.SuccessResponse(json, request)
+    else:
+        return utils.ErrorResponse('2333', 'keys is empty', request)
 
 
 # 获取所有狗品种

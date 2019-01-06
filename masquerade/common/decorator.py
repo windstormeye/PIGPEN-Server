@@ -16,13 +16,13 @@ def request_methon(method):
     return decorator
 
 
-'''
-    @description    every API should put `masuser_id` and `nick_name` keys.
-                    If args=None, should put null list, e.g: []    
-'''
-
-
 def request_check_args(args=None):
+    """
+    every API should put `masuser_id` and `nick_name` keys.
+    If args=None, should put null list, e.g: []
+    :param args:
+    :return:
+    """
     def decorator(func):
         @wraps(func)
         def wrapper(request):
@@ -35,7 +35,9 @@ def request_check_args(args=None):
             args.append('uid')
             for item in args:
                 if item not in request_args:
-                    return utils.ErrorResponse(1002, '参数错误', request)
+                    return utils.ErrorResponse(1002,
+                                               'require % s' % item,
+                                               request)
             return func(request)
 
         return wrapper
