@@ -12,19 +12,17 @@ class Pet(models.Model):
     # 宠物类型：cat/dog
     pet_type = models.CharField(default='其它', max_length=4)
     # 体重默认为 5 公斤
-    weight = models.IntegerField(default=5)
+    weight = models.IntegerField(default=5000)
     # 绝育状态默认为 不绝育
     ppp_status = models.IntegerField(default=0)
     # 感情状态默认为 单身
     love_status = models.IntegerField(default=0)
     # 宠物生日
-    birth_time = models.CharField(max_length=8)
+    birth_time = models.CharField(max_length=10)
     # 宠物品种
     breed_type = models.CharField(max_length=20)
     # 宠物每日进食重量
     food_weight = models.IntegerField(default=0)
-    # 宠物头像
-    avatar = models.CharField(max_length=100, default='')
     created_time = models.DateTimeField(auto_now_add=True)
     last_updated_time = models.DateTimeField(auto_now=True)
 
@@ -40,8 +38,7 @@ class Pet(models.Model):
             'love_status': self.love_status,
             'birth_time': self.birth_time,
             'gender': self.gender,
-            'created_time': self.created_time.timestamp(),
-            'avatar_path': self.avatar,
+            'created_time': str(int(self.created_time.timestamp())),
         }
         return json
 

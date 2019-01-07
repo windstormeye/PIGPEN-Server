@@ -3,6 +3,7 @@ from .models import MasUser
 from common import token_utils, utils, decorator, masLogger
 from virtual_pet.models import virtualPet
 from pet.models import Pet
+from pet.views import get_pet
 
 
 @decorator.request_methon('POST')
@@ -89,7 +90,7 @@ def get_user_pet_info(request):
     real_pet_array = []
     real_pets = Pet.objects.filter(user__uid=uid)
     for real_pet in real_pets:
-        real_pet_array.append(real_pet.toJSON())
+        real_pet_array.append(get_pet(real_pet.pet_id, uid))
 
     # 获取虚拟宠物信息
     virtual_pet_array = []

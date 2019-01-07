@@ -27,7 +27,7 @@ def create_pet(request):
     breed_type = request.POST.get('breed_type')
     food_weight = request.POST.get('food_weight')
 
-    user = MasUser.objects.filter(uid=uid)
+    user = MasUser.objects.filter(uid=uid).first()
     if user:
         # 宠物实体
         pet = Pet.create(nick_name=pet_nick_name, gender=gender,
@@ -37,18 +37,17 @@ def create_pet(request):
                          breed_type=breed_type, food_weight=food_weight)
         # 宠物关系实体
         relation = PetRelationship(pet_id=pet.pet_id, uid=uid,
-                                   relationship_code=relation_code).save()
+                                   relationship_code=relation_code)
+        relation.save()
 
         # 宠物头像
         Avatar(own_id=pet.pet_id, avatar_key=avatar_key).save()
 
-        json = {
-            'pet': pet.toJSON(),
-            'relationship': relation.relationship_code,
-            'avatar_url': utils.create_full_image_url([avatar_key])
-        }
+        petJSON = pet.toJSON()
+        petJSON['avatar_url'] = utils.create_full_image_url([avatar_key])
+        petJSON['relationship'] = relation.relationship_code
         masLogger.log(request, 666)
-        return utils.SuccessResponse(json, request)
+        return utils.SuccessResponse(petJSON, request)
     else:
         return utils.ErrorResponse('2333', 'user not exist', request)
 
@@ -103,6 +102,28 @@ def upload_pet_avatar_key(request):
         return utils.SuccessResponse(json, request)
     else:
         return utils.ErrorResponse('2333', 'keys is empty', request)
+
+
+def get_pet(pet_id, uid):
+    """
+    获取某一宠物全部信息
+    :param pet_id: 宠物 id
+    :param uid: 用户 id
+    :return:
+    """
+    pet = Pet.objects.filter(pet_id=pet_id).first()
+    if pet:
+        pet_avatar_key = Avatar.objects.filter(own_id=pet_id).first()
+        if pet_avatar_key:
+            key = pet_avatar_key.avatar_key
+            pet_avatar_url = utils.create_full_image_url([key])[0]
+            pet_relation = PetRelationship.objects.filter(pet_id=pet_id, uid=uid)\
+                .first()
+            if pet_relation:
+                petJSON = pet.toJSON()
+                petJSON['avatar_url'] = pet_avatar_url
+                petJSON['relationship'] = pet_relation.relationship_code
+                return petJSON
 
 
 # 获取所有狗品种
