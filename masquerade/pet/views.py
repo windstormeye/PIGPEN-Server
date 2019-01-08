@@ -44,9 +44,8 @@ def create_pet(request):
         Avatar(own_id=pet.pet_id, avatar_key=avatar_key).save()
 
         petJSON = pet.toJSON()
-        petJSON['avatar_url'] = utils.create_full_image_url([avatar_key])
-        petJSON['relationship'] = relation.relationship_code
-        masLogger.log(request, 666)
+        petJSON['avatar_url'] = utils.create_full_image_url([avatar_key])[0]
+        petJSON['relationship'] = int(relation.relationship_code)
         return utils.SuccessResponse(petJSON, request)
     else:
         return utils.ErrorResponse('2333', 'user not exist', request)

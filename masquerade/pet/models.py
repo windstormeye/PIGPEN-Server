@@ -33,11 +33,12 @@ class Pet(models.Model):
             'nick_name': self.nick_name,
             'pet_id': self.pet_id,
             'pet_type': self.pet_type,
-            'weight': self.weight,
-            'ppp_status': self.ppp_status,
-            'love_status': self.love_status,
+            'weight': int(self.weight),
+            'ppp_status': int(self.ppp_status),
+            'love_status': int(self.love_status),
             'birth_time': self.birth_time,
-            'gender': self.gender,
+            'gender': int(self.gender),
+            'breed_type': self.breed_type,
             'created_time': str(int(self.created_time.timestamp())),
         }
         return json
