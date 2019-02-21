@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 定时任务插件
+    'django_crontab',
     'user',
     'blog',
     'comment',
@@ -115,6 +117,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# django-crontab 定时任务配置
+CRONJOBS = [
+    ('*/1 * * * *', 'pet.tasks.updatePannageTask'),
+]
+
 # set admin email, and remember set DEBUG = False
 ADMINS = (
     ('pjhubs', '877302410@qq.com'),
@@ -164,7 +171,7 @@ LOGGING = {
         'info_file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': 'log/info.log',
+            'filename': os.path.join(BASE_DIR, "log", 'log.log'),
         },
         # 发送邮件通知管理员
         # AdminEmail处理器，所有高于（包括）而error的消息会被发送给站点管理员，使用的是special格式器
