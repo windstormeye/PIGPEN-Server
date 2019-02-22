@@ -119,7 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # django-crontab 定时任务配置
 CRONJOBS = [
-    ('*/1 * * * *', 'pet.tasks.updatePannageTask'),
+    ('0 08 * * *', 'pet.tasks.updatePannageTask'),
 ]
 
 # set admin email, and remember set DEBUG = False
