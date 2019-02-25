@@ -1,3 +1,4 @@
+import time
 from pet_drink.models import PetDrink, PetDrinkLog
 from pet.models import Pet
 from common import decorator, utils
@@ -35,7 +36,8 @@ def updateWaterConsume(request):
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['pet_id', 'water_residue'])
+@decorator.request_check_args(['pet_id',
+                               'water_residue'])
 def updateWaterResidue(request):
     """
     更新宠物剩水量
@@ -46,18 +48,36 @@ def updateWaterResidue(request):
 
     pet = Pet.objects.filter(pet_id=pet_id,
                              user__uid=uid).first()
-    pet_drink = PetDrink.objects.filter(pet__pet_id=pet_id).first()
+    pet_drink = PetDrink.objects.filter(pet=pet).first()
     # 宠物必须存在并且设置过宠物饮水量
     if pet and pet_drink:
-        pet_drink = PetDrink.objects.update(pet=pet,
-                                            water_residue=water_residue)
+        old_time = int(pet_drink.updated_time.timestamp())
+        now_time = int(time.time())
+        # 上次更新时间到当前时间的间隔秒数
+        interval_seconds = now_time - old_time
+        # 上次更新时间到当前时间的间隔小时数
+        interval_hours = interval_seconds / 3600
+        # 间隔小时中需要消耗的水量
+        water_total = pet_drink.water_consume * interval_hours
+        # 先消耗原有剩余水量
+        pet_drink.water_residue -= int(water_total)
+        # 后加上此次新增的水量
+        pet_drink.water_residue += int(water_residue)
+        if pet_drink.water_residue > 0:
+            # 剩余水量还可消耗多长时间（秒数）
+            time_residue = pet_drink.water_residue / pet_drink.water_consume * 3600
+        else:
+            # -1 为还是缺水
+            # TODO：这里如果是 -1 需要扣分！！！
+            time_residue = -1
         pet_drink.save()
-        return utils.SuccessResponse(pet_drink.toJSON(),
+
+        json = pet_drink.toJSON()
+        # 预计消耗完的时间
+        json['time_finish'] = int(now_time + time_residue)
+        return utils.SuccessResponse(json,
                                      request)
     else:
         return utils.ErrorResponse(2333,
                                    'not pet or not set water_consume for pet',
                                    request)
-    # TODO：还没测试过
-
-

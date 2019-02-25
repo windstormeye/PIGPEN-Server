@@ -11,8 +11,6 @@ class PetDrink(models.Model):
     water_consume = models.IntegerField(default=100)
     # 剩水量
     water_residue = models.IntegerField(default=0)
-    # 剩余时间 = 储水量 / 耗水量
-    time_residue = models.IntegerField(default=0)
     updated_time = models.DateTimeField(auto_now=True)
 
     def toJSON(self):
@@ -20,7 +18,6 @@ class PetDrink(models.Model):
             'pet': self.pet.toJSON(),
             'water_consume': self.water_consume,
             'water_residue': self.water_residue,
-            'time_residue': self.time_residue,
             'updated_time': int(self.updated_time.timestamp())
         }
         return json

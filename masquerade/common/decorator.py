@@ -28,7 +28,7 @@ def request_check_args(args=None):
             args.append('nick_name')
             args.append('uid')
             for item in args:
-                if item not in request_args and item != '':
+                if item not in request_args and item == '':
                     return utils.ErrorResponse(1002,
                                                'require % s' % item,
                                                request)
