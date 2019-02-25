@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'virtual_pet',
     'relationship',
     'avatar',
+    'pet_drink',
 ]
 
 MIDDLEWARE = [

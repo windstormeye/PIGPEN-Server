@@ -46,6 +46,20 @@ class Pet(models.Model):
     @classmethod
     def create(cls, user, nick_name, pet_type, weight, ppp_status, love_status,
                birth_time, gender, breed_type, food_weight):
+        """
+        创建宠物实体类方法
+        :param user: 关联的用户
+        :param nick_name: 宠物昵称
+        :param pet_type: 宠物类型，狗 or 猫
+        :param weight: 宠物重量
+        :param ppp_status: 宠物绝育情况
+        :param love_status: 宠物配偶情况
+        :param birth_time: 宠物生日
+        :param gender: 宠物性别
+        :param breed_type: 宠物种类
+        :param food_weight: 宠物每日进食量
+        :return: 创建出来的宠物实体
+        """
         import shortuuid
 
         shortuuid.set_alphabet('0123456789')
@@ -66,11 +80,17 @@ class Pet(models.Model):
 
 
 class dog_breed(models.Model):
+    """
+    狗 种类
+    """
     group = models.CharField(max_length=2)
     zh_name = models.CharField(max_length=50)
 
 
 class cat_breed(models.Model):
+    """
+    猫 种类
+    """
     group = models.CharField(max_length=2)
     zh_name = models.CharField(max_length=50)
 

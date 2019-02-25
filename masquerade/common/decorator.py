@@ -9,7 +9,7 @@ def request_methon(method):
             if method == request.method:
                 return func(request)
             else:
-                return utils.ErrorResponse(2001, '请求方法错误', request)
+                return utils.ErrorResponse(2001, 'request method error', request)
 
         return wrapper
 
@@ -17,12 +17,6 @@ def request_methon(method):
 
 
 def request_check_args(args=None):
-    """
-    every API should put `masuser_id` and `nick_name` keys.
-    If args=None, should put null list, e.g: []
-    :param args:
-    :return:
-    """
     def decorator(func):
         @wraps(func)
         def wrapper(request):
@@ -34,7 +28,7 @@ def request_check_args(args=None):
             args.append('nick_name')
             args.append('uid')
             for item in args:
-                if item not in request_args:
+                if item not in request_args and item != '':
                     return utils.ErrorResponse(1002,
                                                'require % s' % item,
                                                request)

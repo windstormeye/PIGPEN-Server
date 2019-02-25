@@ -29,6 +29,7 @@ class MasUser(models.Model):
             'nick_name': self.nick_name,
             'avatar': self.avatar,
             'gender': self.gender,
+            'money': self.money,
             'created_time': int(self.created_time.timestamp()),
         }
 
