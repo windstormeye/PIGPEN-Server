@@ -4,6 +4,35 @@ from pet.models import Pet
 from common import decorator, utils
 
 
+@decorator.request_methon('GET')
+@decorator.request_check_args(['pet_id'])
+def petWaterDetails(request):
+    """
+    获取宠物加水`log`和当前的剩水量
+    """
+    pet_id = request.GET.get('pet_id')
+    uid = request.GET.get('uid')
+
+    pet = Pet.objects.filter(pet_id=pet_id,
+                             user__uid=uid).first()
+    pet_drink = PetDrink.objects.filter(pet=pet).first()
+    if pet and pet_drink:
+        json = pet_drink.toJSON()
+        logs = []
+
+        pet_drink_logs = PetDrinkLog.objects.filter(pet=pet)
+        for log in pet_drink_logs:
+            logs.append(log.toJSON())
+        json['logs'] = logs
+
+        return utils.SuccessResponse(json,
+                                     request)
+    else:
+        return utils.ErrorResponse(2333,
+                                   'not pet or not set water_consume for pet',
+                                   request)
+
+
 @decorator.request_methon('POST')
 @decorator.request_check_args(['pet_id',
                                'water_consume'])
@@ -63,18 +92,23 @@ def updateWaterResidue(request):
         pet_drink.water_residue -= int(water_total)
         # 后加上此次新增的水量
         pet_drink.water_residue += int(water_residue)
+        pet_drink.save()
+
+        # 更新宠物饮水记录
+        PetDrinkLog(pet=pet, current_water=water_residue).save()
+        json = pet_drink.toJSON()
+
         if pet_drink.water_residue > 0:
             # 剩余水量还可消耗多长时间（秒数）
             time_residue = pet_drink.water_residue / pet_drink.water_consume * 3600
+            # 预计消耗完的时间
+            json['time_finish'] = int(now_time + time_residue)
         else:
             # -1 为还是缺水
             # TODO：这里如果是 -1 需要扣分！！！
             time_residue = -1
-        pet_drink.save()
+            json['time_finish'] = time_residue
 
-        json = pet_drink.toJSON()
-        # 预计消耗完的时间
-        json['time_finish'] = int(now_time + time_residue)
         return utils.SuccessResponse(json,
                                      request)
     else:
