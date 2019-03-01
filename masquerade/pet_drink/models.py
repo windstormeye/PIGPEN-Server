@@ -31,6 +31,9 @@ class PetDrinkLog(models.Model):
     current_water = models.IntegerField(default=0)
     updated_time = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-updated_time']
+
     def toJSON(self):
         json = {
             'pet_id': self.pet.pet_id,
