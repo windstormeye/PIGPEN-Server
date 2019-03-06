@@ -7,10 +7,17 @@ class PetDrink(models.Model):
     pet = models.OneToOneField(Pet,
                                on_delete=models.CASCADE,
                                primary_key=True)
-    # 饮水量，默认耗水量为 100ml
+    # 所需水量
     water_consume = models.IntegerField(default=100)
-    # 剩水量
+    # 剩余水量
     water_residue = models.IntegerField(default=0)
+    # 每分钟耗水量
+    water_consume_min = models.DecimalField(max_digits=4,
+                                            decimal_places=2)
+    # 最后一次添加水的时间
+    add_water_time = models.DateTimeField()
+    # 水量消耗完时间
+    finish_time = models.DateTimeField()
     updated_time = models.DateTimeField(auto_now=True)
 
     def toJSON(self):

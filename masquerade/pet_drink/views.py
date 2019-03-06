@@ -46,6 +46,7 @@ def updateWaterConsume(request):
     """
     pet_id = request.POST.get('pet_id')
     uid = request.POST.get('uid')
+    # 每小时进水量
     water_consume = request.POST.get('water_consume')
 
     pet = Pet.objects.filter(pet_id=pet_id,
@@ -53,12 +54,16 @@ def updateWaterConsume(request):
 
     if pet:
         pet_drink = PetDrink.objects.filter(pet=pet).first()
+        # 转化成每分钟进水量
+        water_consume_min = water_consume / 60
         if pet_drink:
             pet_drink.water_consume = water_consume
+            pet_drink.water_consume_min = water_consume_min
             pet_drink.save()
         else:
             pet_drink = PetDrink(pet=pet,
-                                 water_consume=water_consume)
+                                 water_consume=water_consume,
+                                 water_consume_min=water_consume_min)
             pet_drink.save()
         return utils.SuccessResponse(pet_drink.toJSON(),
                                      request)
@@ -121,19 +126,46 @@ def updatePetDrinkData(pet_drink, water_residue):
     # 间隔小时中需要消耗的水量
     water_total = pet_drink.water_consume * interval_hours
     # 先消耗原有剩余水量
-    # TODO: 这里会出现大负数，怎么处理？
     pet_drink.water_residue -= int(water_total)
     # 后加上此次新增的水量
     pet_drink.water_residue += int(water_residue)
+    # 如果小于 0 后，则直接设置为 0
+    if pet_drink.water_residue < 0:
+        pet_drink.water_residue = 0
     pet_drink.save()
 
-    if pet_drink.water_residue > 0:
+    if pet_drink.water_residue != 0:
         # 剩余水量还可消耗多长时间（秒数）
         time_residue = pet_drink.water_residue / pet_drink.water_consume * 3600
         # 预计消耗完的时间
         return int(int(time.time()) + time_residue)
     else:
-
         # -1 为还是缺水
         # TODO：这里如果是 -1 需要扣分！！！
         return -1
+
+
+def updateWaterData(pet_drink):
+    now_time = int(time.time())
+    add_water_time = int(pet_drink.add_water_time)
+    # 跨度时间 = 当前时间 - 加水时间
+    span_time_min = (now_time - add_water_time) / 60
+    # 跨度时间中需要消耗的水量
+    span_water = span_time_min * pet_drink.water_consume_min
+    # 当前剩水量 = 宠物剩水量 - 跨度时间中需要消耗的水量
+    current_water = pet_drink.water_residue - span_water
+
+    if current_water > 0:
+        pet_drink.water_residue = current_water
+    else:
+        pet_drink.water_residue = 0
+
+        # 扣分
+        # 超出时间 = 当前时间 - 水量消耗完时间
+        out_time_min = (now_time - pet_drink.finish_time) / 60
+        # 需要扣的分
+        # 0.07 = 10分 / 60min
+        deduct_marks = out_time_min * 0.07
+        # TODO：更新数据库
+    pet_drink.save()
+
