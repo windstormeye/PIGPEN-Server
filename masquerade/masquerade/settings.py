@@ -91,7 +91,7 @@ WSGI_APPLICATION = 'masquerade.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'pigpen',
+        'NAME': 'pigpen_db',
         'USER': 'pigpen',
         'PASSWORD': 'pigpen_2018',
         'HOST': '',
@@ -120,7 +120,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # django-crontab 定时任务配置
 CRONJOBS = [
+    # 早上 8：00
     ('0 08 * * *', 'pet.tasks.updatePannageTask'),
+    # 早上 8：00
+    ('0 08 * * *', 'pet_drink.tasks.update8HourWaterMarks'),
+    # 下午 16：00
+    ('0 16 * * *', 'pet_drink.tasks.update16HourWaterMarks'),
+    # 晚上 24：00
+    ('0 24 * * *', 'pet_drink.tasks.update24HourWaterMarks'),
+    # 晚上 24：00
+    ('0 24 * * *', 'pet_drink.tasks.updateDayWaterMarks'),
 ]
 
 # set admin email, and remember set DEBUG = False
