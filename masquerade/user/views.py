@@ -1,4 +1,6 @@
 import hashlib
+import TLSSigAPI
+from django.conf import settings
 from .models import MasUser
 from common import token_utils, utils, decorator, masLogger
 from virtual_pet.models import virtualPet
@@ -179,3 +181,24 @@ def check_phone(request):
             'status': '可注册'
         }
         return utils.SuccessResponse(json, request)
+
+
+@decorator.request_methon('GET')
+@decorator.request_check_args([])
+def getMessgeSig(request):
+    """
+    获取当前 uid 登录 IM 时的 sig
+    """
+    uid = request.GET.get('uid')
+
+    api = TLSSigAPI.TLSSigAPI(1400000000,
+                              settings.PRIVATE_KEY,
+                              settings.PUBLICK_KEY)
+    sig = api.gen_sig(uid)
+
+    json = {
+        'uid_sig': sig
+    }
+
+    return utils.SuccessResponse(json,
+                                 request)

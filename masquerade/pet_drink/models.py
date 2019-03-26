@@ -27,6 +27,7 @@ class PetDrink(models.Model):
             'pet': self.pet.toJSON(),
             'water_consume': self.water_consume,
             'water_residue': self.water_residue,
+            'finish_time': self.finish_time,
             'updated_time': int(self.updated_time.timestamp())
         }
         return json
@@ -58,20 +59,27 @@ class PetDrinkMarks(models.Model):
     """宠物当前分数（实时变化）"""
 
     # 关联宠物实体
-    pet = models.ForeignKey(Pet,
-                            on_delete=models.CASCADE,
-                            primary_key=True)
+    pet = models.OneToOneField(Pet,
+                               on_delete=models.CASCADE,
+                               primary_key=True)
     water_marks = models.DecimalField(max_digits=4,
                                       decimal_places=2,
                                       default=10)
     updated_time = models.DateTimeField(auto_now=True)
 
+    def toJSON(self):
+        json = {
+            'current_water_marks': self.water_marks,
+            'updated_time': self.updated_time,
+        }
+        return json
+
 
 class PetDrinkWaterHourMarks(models.Model):
     """宠物时间段水量分数"""
-    pet = models.ForeignKey(Pet,
-                            on_delete=models.CASCADE,
-                            primary_key=True)
+    pet = models.OneToOneField(Pet,
+                               on_delete=models.CASCADE,
+                               primary_key=True)
     water_8_marks = models.DecimalField(max_digits=4,
                                         decimal_places=2)
     water_16_marks = models.DecimalField(max_digits=4,
@@ -79,6 +87,14 @@ class PetDrinkWaterHourMarks(models.Model):
     water_24_marks = models.DecimalField(max_digits=4,
                                          decimal_places=2)
     updated_time = models.DateTimeField(auto_now=True)
+
+    def toJSON(self):
+        json = {
+            '8': self.water_8_marks,
+            '16': self.water_16_marks,
+            '24': self.water_24_marks,
+        }
+        return json
 
 
 class PetDrinkWaterDayMarks(models.Model):

@@ -1,5 +1,5 @@
 import time
-from pet_drink.models import PetDrink, PetDrinkLog, PetDrinkMarks
+from pet_drink.models import PetDrink, PetDrinkLog, PetDrinkMarks, PetDrinkWaterHourMarks
 from pet.models import Pet
 from common import decorator, utils
 
@@ -7,9 +7,7 @@ from common import decorator, utils
 @decorator.request_methon('GET')
 @decorator.request_check_args(['pet_id'])
 def petWaterDetails(request):
-    """获取宠物加水`log`和当前的剩水量"""
-
-    #TODO: 重写
+    """获取宠物水量详情：当前分数、当前时间段分数、当前剩水量、预期消耗完时间、log"""
 
     pet_id = request.GET.get('pet_id')
     uid = request.GET.get('uid')
@@ -18,17 +16,27 @@ def petWaterDetails(request):
                              user__uid=uid).first()
     pet_drink = PetDrink.objects.filter(pet=pet).first()
     if pet and pet_drink:
-        json = pet_drink.toJSON()
-        logs = []
+        pet_drink = updateWaterData(pet_drink)
 
-        # 插入水量卡可供消耗时间
-        json['time_finish'] = updatePetDrinkData(pet_drink, 0)
+        # 当前剩水量、预期消耗完时间
+        json = pet_drink.toJSON()
 
         # 插入加水记录
+        logs = []
         pet_drink_logs = PetDrinkLog.objects.filter(pet=pet)
         for log in pet_drink_logs:
             logs.append(log.toJSON())
         json['logs'] = logs
+
+        # 当前分数
+        pet_current_water_marks = PetDrinkMarks.objects.filter(pet=pet).first()
+        if pet_current_water_marks:
+            json['current_marks'] = pet_current_water_marks.toJSON()
+
+        # 当前时间段分数
+        pet_hour_water_marks = PetDrinkWaterHourMarks.objects.filter(pet=pet).filter()
+        if pet_hour_water_marks:
+            json['hour_marks'] = pet_hour_water_marks.toJSON()
 
         return utils.SuccessResponse(json,
                                      request)

@@ -14,10 +14,6 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# 狗品种
-DOG_BREED_DIR = BASE_DIR + '/pet/dog_breed.txt'
-# 猫品种
-CAT_BREED_DIR = BASE_DIR + '/pet/cat_breed.txt'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
@@ -271,3 +267,16 @@ EACH_PAGE_BLOGS_NUMBER = 10
 # 七牛
 QINIU_ACCESS_KEY = 'HUFE4cvWpUrohdU7w1HU-Lb82jOvI58er5DlPSDs'
 QINIU_SECRET_KEY = '6bRiKrD-P37HJUIbT3KWEKNRuZd_Zr_XQCecW7QR'
+
+# 狗品种
+DOG_BREED_DIR = BASE_DIR + '/pet/dog_breed.txt'
+# 猫品种
+CAT_BREED_DIR = BASE_DIR + '/pet/cat_breed.txt'
+
+# 腾讯云 IM
+PRIVATE_KEY = '''MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgZZZv94GzK3q+7aeK
+I9mZbJlh9l9P6QowSJaYvzc6OlOhRANCAAT1bCrN4quLqX2Ze2spGlpozO9hfKNe
+k8NTvKaJc+rizKh2JDpwjihHwHatTIMoiE+ZTiYk7xybM9uQmjVxqpgx'''
+
+PUBLICK_KEY = '''MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE9WwqzeKri6l9mXtrKRpaaMzvYXyj
+XpPDU7ymiXPq4syodiQ6cI4oR8B2rUyDKIhPmU4mJO8cmzPbkJo1caqYMQ=='''
