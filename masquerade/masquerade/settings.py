@@ -273,10 +273,6 @@ DOG_BREED_DIR = BASE_DIR + '/pet/dog_breed.txt'
 # 猫品种
 CAT_BREED_DIR = BASE_DIR + '/pet/cat_breed.txt'
 
-# 腾讯云 IM
-PRIVATE_KEY = '''MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgZZZv94GzK3q+7aeK
-I9mZbJlh9l9P6QowSJaYvzc6OlOhRANCAAT1bCrN4quLqX2Ze2spGlpozO9hfKNe
-k8NTvKaJc+rizKh2JDpwjihHwHatTIMoiE+ZTiYk7xybM9uQmjVxqpgx'''
-
-PUBLICK_KEY = '''MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE9WwqzeKri6l9mXtrKRpaaMzvYXyj
-XpPDU7ymiXPq4syodiQ6cI4oR8B2rUyDKIhPmU4mJO8cmzPbkJo1caqYMQ=='''
+# 融云
+RC_APP_KEY = 'kj7swf8ok3sq2'
+RC_APP_SECRET = 'DughOAL5cS9c1'

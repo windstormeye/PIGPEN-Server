@@ -1,5 +1,4 @@
 import hashlib
-import TLSSigAPI
 from django.conf import settings
 from .models import MasUser
 from common import token_utils, utils, decorator, masLogger
@@ -185,20 +184,25 @@ def check_phone(request):
 
 @decorator.request_methon('GET')
 @decorator.request_check_args([])
-def getMessgeSig(request):
-    """
-    获取当前 uid 登录 IM 时的 sig
-    """
+def getRCToken(request):
+    from rongcloud import RongCloud
+
     uid = request.GET.get('uid')
+    nick_name = request.GET.get('nick_name')
 
-    api = TLSSigAPI.TLSSigAPI(1400000000,
-                              settings.PRIVATE_KEY,
-                              settings.PUBLICK_KEY)
-    sig = api.gen_sig(uid)
+    app_key = settings.RC_APP_KEY
+    app_secret = settings.RC_APP_SECRET
+    rcloud = RongCloud(app_key, app_secret)
 
-    json = {
-        'uid_sig': sig
-    }
+    r = rcloud.User.getToken(userId=uid,
+                             name=nick_name,
+                             portraitUri='https://avatars0.githubusercontent.com/u/15074681?s=460&v=4')
 
-    return utils.SuccessResponse(json,
-                                 request)
+    r_json = eval(str(r.response.content, encoding='utf-8'))
+    if r_json['code'] == 200:
+        json = {
+            'token': r_json['token']
+        }
+        return utils.SuccessResponse(json, request)
+    else:
+        return utils.ErrorResponse(2333, 'RCToken error')
