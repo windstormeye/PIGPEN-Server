@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('comment_time', models.DateTimeField(auto_now_add=True)),
                 ('is_deleted', models.IntegerField(default=0)),
                 ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.ContentType')),
-                ('masuser_text.txt', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.MasUser')),
+                ('masuser', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.MasUser')),
                 ('parent', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='parent_comment', to='comment.Comment')),
                 ('root', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='root_comment', to='comment.Comment')),
             ],

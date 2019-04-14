@@ -29,7 +29,7 @@ def blog_list(request):
     for blog in blogs:
         masuserId = blog['masuser_id']
         masuser = MasUser.objects.get(pk=masuserId)
-        # replace field `masuser_text.txt`
+        # replace field `masuser`
         blog['masuser'] = masuser.toJSON()
 
         # get blog read_num
@@ -119,7 +119,7 @@ def blog_details(request):
                 'blog_content': blog.content,
                 'blog_created_time': blog.created_time.timestamp(),
             },
-            'masuser_text.txt': blog.masuser.toJSON(),
+            'masuser': blog.masuser.toJSON(),
         }
         return utils.SuccessResponse(json, request)
     else:

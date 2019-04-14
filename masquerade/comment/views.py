@@ -59,7 +59,7 @@ def get_comment(request):
                     'comment_id': c_m.pk,
                     'comment_content': c_m.text,
                     'comment_created_time': c_m.comment_time.timestamp(),
-                    'masuser_text.txt': MasUser.objects.get(pk=c_m.masuser.pk).toJSON(),
+                    'masuser': MasUser.objects.get(pk=c_m.masuser.pk).toJSON(),
                     'reply_to_masuser': {
                         'nick_name': reply_to,
                     }
@@ -70,7 +70,7 @@ def get_comment(request):
             'comment_id': comment.pk,
             'comment_content': comment.text,
             'comment_created_time': comment.comment_time.timestamp(),
-            'masuser_text.txt': c_masuser.toJSON(),
+            'masuser': c_masuser.toJSON(),
             'child_comments': list(child_final_comments)
         }
         final_comments.append(c)

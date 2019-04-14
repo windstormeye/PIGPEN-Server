@@ -20,8 +20,8 @@ class MasUser(models.Model):
 
     def toJSON(self):
         # from user_avatar.models import UserAvatar
-        # if UserAvatar.objects.filter(masuser_text.txt=self).exists():
-        #     avatar_path = UserAvatar.objects.get(masuser_text.txt=self).avatar.url
+        # if UserAvatar.objects.filter(masuser=self).exists():
+        #     avatar_path = UserAvatar.objects.get(masuser=self).avatar.url
         # else:
         #     avatar_path = ''
         json = {

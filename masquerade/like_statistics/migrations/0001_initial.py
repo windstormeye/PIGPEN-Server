@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('object_id', models.PositiveIntegerField()),
                 ('liked_time', models.DateTimeField(auto_now_add=True)),
                 ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.ContentType')),
-                ('masuser_text.txt', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.MasUser')),
+                ('masuser', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.MasUser')),
             ],
         ),
     ]

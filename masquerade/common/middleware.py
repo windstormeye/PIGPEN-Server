@@ -13,10 +13,10 @@ class tokenCheckMiddleware(MiddlewareMixin):
         # if timestamp:
         #     now_timestamp = (time.time() - 300) / 300
         #     if int(timestamp) >= now_timestamp:
-        #         if request.path != '/masuser_text.txt/createmasuser' and \
-        #                 request.path != '/masuser_text.txt/login' and \
-        #                 request.path != '/masuser_text.txt/updateToken' and \
-        #                 request.path != '/masuser_text.txt/checkPhone':
+        #         if request.path != '/masuser/createmasuser' and \
+        #                 request.path != '/masuser/login' and \
+        #                 request.path != '/masuser/updateToken' and \
+        #                 request.path != '/masuser/checkPhone':
         #             token = request.META.get('HTTP_USERTOKEN')
         #             if token:
         #                 username = token_utils.get_username(token)
