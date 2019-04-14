@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('created_time', models.DateTimeField(auto_now_add=True)),
                 ('last_updated_time', models.DateTimeField(auto_now=True)),
                 ('is_deleted', models.IntegerField(default=0)),
-                ('masuser', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.MasUser')),
+                ('masuser_text.txt', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.MasUser')),
             ],
             options={
                 'ordering': ['-created_time'],

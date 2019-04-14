@@ -82,7 +82,7 @@ def get_like_blog(request):
         blog = Blog.objects.get(pk=like.object_id)
 
         l = {
-            'masuser': masuser.toJSON(),
+            'masuser_text.txt': masuser.toJSON(),
             'content': blog.content,
             'created_time': blog.created_time.timestamp()
         }

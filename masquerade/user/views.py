@@ -24,7 +24,7 @@ def create_masuser(request):
                              avatar=avatar, nick_name=nick_name, gender=gender)
     token = token_utils.create_token(masuser.uid)
     json = {
-        'masuser': masuser.toJSON(),
+        'masuser_text.txt': masuser.toJSON(),
         'token': token,
         # 刚注册用户肯定都没有宠物和虚拟宠物
         'feeding_status': [0, 0, 0]
@@ -59,7 +59,7 @@ def login(request):
                 feeding_status.insert(0, 1)
 
             json = {
-                'masuser': masuser.toJSON(),
+                'masuser_text.txt': masuser.toJSON(),
                 'token': token,
                 'feeding_status': feeding_status
             }
@@ -125,7 +125,7 @@ def get_user_details(request):
             feeding_status.insert(0, 1)
 
         json = {
-            'masuser': user.toJSON(),
+            'masuser_text.txt': user.toJSON(),
             'feeding_status': feeding_status,
         }
         return utils.SuccessResponse(json, request)
@@ -145,7 +145,7 @@ def update_user(request):
 
     if user:
         json = {
-            'masuser': user.toJSON()
+            'masuser_text.txt': user.toJSON()
         }
         return utils.SuccessResponse(json, request)
     else:
@@ -205,4 +205,4 @@ def getRCToken(request):
         }
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse(2333, 'RCToken error')
+        return utils.ErrorResponse(2333, 'RCToken error', request)

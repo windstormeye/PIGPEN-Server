@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'haystack',
     # 定时任务插件
     'django_crontab',
     'user',
@@ -49,6 +50,7 @@ INSTALLED_APPS = [
     'relationship',
     'avatar',
     'pet_drink',
+    'friend',
 ]
 
 MIDDLEWARE = [
@@ -63,10 +65,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'masquerade.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -257,6 +260,20 @@ CACHES = {
         },
     },
 }
+
+# 配置全文搜索
+# 指定搜索引擎
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(BASE_DIR, 'whoosh_index'),
+    },
+}
+# 指定如何对搜索结果分页，这里设置为每 10 项结果为一页，默认是 20 项为一页
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 20
+# 添加此项，当数据库改变时，会自动更新索引
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
