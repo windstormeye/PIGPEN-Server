@@ -205,4 +205,5 @@ def getRCToken(request):
         }
         return utils.SuccessResponse(json, request)
     else:
+        masLogger.log(request, 2333, r.response.content)
         return utils.ErrorResponse(2333, 'RCToken error', request)

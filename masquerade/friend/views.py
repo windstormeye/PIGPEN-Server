@@ -71,7 +71,8 @@ def searchFriend(request):
 
     f_users = []
     for user in users:
-        f_users.append(user.object.toJSON())
+        if user.object:
+            f_users.append(user.object.toJSON())
 
     json = {
         'users': f_users
