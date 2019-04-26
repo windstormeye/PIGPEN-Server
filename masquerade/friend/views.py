@@ -7,9 +7,10 @@ from user.models import MasUser
 
 
 @decorator.request_methon('GET')
-@decorator.request_check_args([])
+@decorator.request_check_args(['type'])
 def getFriend(request):
     uid = request.GET.get('uid')
+    type = request.GET.get('type')
 
     frinds = Friend.objects.filter(Q(userA__uid=uid) | Q(userB__uid=uid),
                                    status=1)
@@ -19,10 +20,14 @@ def getFriend(request):
             my_frind = frind.userB
         else:
             my_frind = frind.userA
-        my_frinds.append(my_frind.toJSON())
+        if type == 0:
+            my_frinds.append(my_frind.toJSON())
+        else:
+            # 这里需要带上宠物信息
+            my_frinds.append(my_frind.toJSON())
 
     json = {
-        'frinds': my_frinds,
+        'friends': my_frinds,
     }
 
     return utils.SuccessResponse(json, request)

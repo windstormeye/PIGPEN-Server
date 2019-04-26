@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'haystack',
-    # 定时任务插件
     'django_crontab',
     'user',
     'blog',
