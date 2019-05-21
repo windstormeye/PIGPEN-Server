@@ -2,7 +2,6 @@ import hashlib
 from django.conf import settings
 from .models import MasUser
 from common import token_utils, utils, decorator, masLogger
-from virtual_pet.models import virtualPet
 from pet.models import Pet
 from pet.views import get_pet
 
@@ -49,19 +48,9 @@ def login(request):
         if sign == masuser_password_hash:
             token = token_utils.create_token(masuser.uid)
 
-            # 喂养状态
-            feeding_status = [0, 0, 0]
-            if virtualPet.objects.filter(user=masuser).exists():
-                feeding_status.insert(2, 1)
-            if Pet.objects.filter(user=masuser, pet_type='dog').exists():
-                feeding_status.insert(1, 1)
-            if Pet.objects.filter(user=masuser, pet_type='cat').exists():
-                feeding_status.insert(0, 1)
-
             json = {
                 'masuser': masuser.toJSON(),
                 'token': token,
-                'feeding_status': feeding_status
             }
             return utils.SuccessResponse(json, request)
         else:
@@ -93,15 +82,8 @@ def get_user_pet_info(request):
     for real_pet in real_pets:
         real_pet_array.append(get_pet(real_pet.pet_id, uid))
 
-    # 获取虚拟宠物信息
-    virtual_pet_array = []
-    virtual_pets = virtualPet.objects.filter(user__uid=uid)
-    for virtual_pet in virtual_pets:
-        virtual_pet_array.append(virtual_pet.toJSON())
-
     json = {
-        'real_pet': real_pet_array,
-        'virtual_pet': virtual_pet_array
+        'pets': real_pet_array,
     }
 
     return utils.SuccessResponse(json, request)
@@ -115,18 +97,8 @@ def get_user_details(request):
 
     user = MasUser.objects.filter(uid=details_uid).first()
     if user:
-        # 喂养状态
-        feeding_status = [0, 0, 0]
-        if virtualPet.objects.filter(user=user).exists():
-            feeding_status.insert(2, 1)
-        if Pet.objects.filter(user=user, pet_type='dog').exists():
-            feeding_status.insert(1, 1)
-        if Pet.objects.filter(user=user, pet_type='cat').exists():
-            feeding_status.insert(0, 1)
-
         json = {
             'masuser': user.toJSON(),
-            'feeding_status': feeding_status,
         }
         return utils.SuccessResponse(json, request)
     else:

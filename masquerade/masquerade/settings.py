@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'read_statistics',
     'like_statistics',
     'pet',
-    'virtual_pet',
     'relationship',
     'avatar',
     'pet_drink',
@@ -89,7 +88,7 @@ WSGI_APPLICATION = 'masquerade.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'pigpen_db',
+        'NAME': 'pigpen',
         'USER': 'pigpen',
         'PASSWORD': 'pigpen_2018',
         'HOST': '',

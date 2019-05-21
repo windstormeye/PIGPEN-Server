@@ -4,25 +4,29 @@ from user.models import MasUser
 
 class Pet(models.Model):
     # 宠物 id
-    pet_id = models.CharField(max_length=10, unique=True)
+    pet_id = models.IntegerField(unique=True)
     # 宠物昵称
     nick_name = models.CharField(unique=True, max_length=18)
-    # 宠物性别
+    # 宠物性别: 0 = 女，1 = 男
     gender = models.IntegerField(default=1)
-    # 宠物类型：cat/dog
-    pet_type = models.CharField(default='其它', max_length=4)
-    # 体重默认为 5 公斤
+    # 宠物类型：0 = cat, 1 = dog
+    pet_type = models.IntegerField(default=0)
+    # 体重默认为 5000 克
     weight = models.IntegerField(default=5000)
-    # 绝育状态默认为 不绝育
+    # 绝育状态默认为
+    # 0 = 未绝育 1 = 已绝育
     ppp_status = models.IntegerField(default=0)
-    # 感情状态默认为 单身
+    # 感情状态默认为
+    # 0 = 单身 1 = 恋爱 2 = 混乱
     love_status = models.IntegerField(default=0)
     # 宠物生日
-    birth_time = models.CharField(max_length=10)
+    birth_time = models.IntegerField(default=0)
     # 宠物品种
     breed_type = models.CharField(max_length=20)
     # 宠物每日进食重量
     food_weight = models.IntegerField(default=0)
+    # 0 平稳 1 一般 2 活跃
+    activity = models.IntegerField(default=0)
     created_time = models.DateTimeField(auto_now_add=True)
     last_updated_time = models.DateTimeField(auto_now=True)
 
@@ -31,25 +35,28 @@ class Pet(models.Model):
     def toJSON(self):
         json = {
             'nick_name': self.nick_name,
-            'pet_id': self.pet_id,
-            'pet_type': self.pet_type,
+            'pet_id': int(self.pet_id),
+            'pet_type': int(self.pet_type),
             'weight': int(self.weight),
             'ppp_status': int(self.ppp_status),
             'love_status': int(self.love_status),
-            'birth_time': self.birth_time,
+            'birth_time': int(self.birth_time),
             'gender': int(self.gender),
             'breed_type': self.breed_type,
-            'created_time': str(int(self.created_time.timestamp())),
+            'created_time': int(self.created_time.timestamp()),
+            'activity': int(self.activity),
+            'food_weight': int(self.food_weight)
         }
         return json
 
     @classmethod
-    def create(cls, user, nick_name, pet_type, weight, ppp_status, love_status,
-               birth_time, gender, breed_type, food_weight):
+    def create(cls, user, pet_nick_name, pet_type, weight, ppp_status, love_status,
+               birth_time, gender, breed_type, food_weight, activity):
         """
         创建宠物实体类方法
+        :param activity: 宠物运动量
         :param user: 关联的用户
-        :param nick_name: 宠物昵称
+        :param pet_nick_name: 宠物昵称
         :param pet_type: 宠物类型，狗 or 猫
         :param weight: 宠物重量
         :param ppp_status: 宠物绝育情况
@@ -71,10 +78,10 @@ class Pet(models.Model):
             else:
                 break
 
-        pet = Pet(nick_name=nick_name, pet_id=pet_id, pet_type=pet_type,
+        pet = Pet(nick_name=pet_nick_name, pet_id=pet_id, pet_type=pet_type,
                   weight=weight, ppp_status=ppp_status, love_status=love_status,
                   birth_time=birth_time, gender=gender, user=user,
-                  breed_type=breed_type, food_weight=food_weight)
+                  breed_type=breed_type, food_weight=food_weight, activity=activity)
         pet.save()
         return pet
 

@@ -12,7 +12,7 @@ from avatar.models import Avatar
 @decorator.request_check_args(['pet_nick_name', 'gender', 'pet_type',
                                'birth_time', 'weight', 'ppp_status',
                                'love_status', 'relation_code', 'avatar_key',
-                               'breed_type', 'food_weight'])
+                               'breed_type', 'food_weight', 'activity'])
 def create_pet(request):
     pet_nick_name = request.POST.get('pet_nick_name', '')
     gender = request.POST.get('gender', '')
@@ -26,15 +26,22 @@ def create_pet(request):
     avatar_key = request.POST.get('avatar_key')
     breed_type = request.POST.get('breed_type')
     food_weight = request.POST.get('food_weight')
+    activity = request.POST.get('activity')
 
     user = MasUser.objects.filter(uid=uid).first()
     if user:
         # 宠物实体
-        pet = Pet.create(nick_name=pet_nick_name, gender=gender,
-                         pet_type=pet_type, weight=weight,
-                         birth_time=birth_time, love_status=love_status,
-                         ppp_status=ppp_status, user=user,
-                         breed_type=breed_type, food_weight=food_weight)
+        pet = Pet.create(pet_nick_name=pet_nick_name,
+                         gender=gender,
+                         pet_type=pet_type,
+                         weight=weight,
+                         birth_time=birth_time,
+                         love_status=love_status,
+                         ppp_status=ppp_status,
+                         user=user,
+                         breed_type=breed_type,
+                         food_weight=food_weight,
+                         activity=activity)
         # 宠物关系实体
         relation = PetRelationship(pet_id=pet.pet_id, uid=uid,
                                    relationship_code=relation_code)
@@ -56,8 +63,8 @@ def create_pet(request):
 def get_breeds(request):
     pet_type = request.GET.get('pet_type', '')
     functions = {
-        'dog': dog(),
-        'cat': cat()
+        '0': cat(),
+        '1': dog()
     }
 
     if pet_type in functions.keys():

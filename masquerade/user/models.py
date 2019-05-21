@@ -4,17 +4,16 @@ from django.db import models
 
 class MasUser(models.Model):
     # 用户唯一标识符
-    uid = models.CharField(max_length=10, primary_key=True, db_index=True)
+    uid = models.BigIntegerField(primary_key=True,
+                                 db_index=True)
     phone_number = models.CharField(max_length=11,
                                     validators=[RegexValidator(r'^\d{1,11}$')],
                                     default='')
     password = models.CharField(max_length=32, blank=False)
-    nick_name = models.CharField(max_length=18, unique=True, blank=False)
+    nick_name = models.CharField(max_length=20, unique=True, blank=False)
     # 男 = 0，女 = 1
     gender = models.IntegerField(default=1)
     avatar = models.IntegerField(default=-1)
-    # 猪饲料
-    money = models.IntegerField(default=0)
     created_time = models.DateTimeField(auto_now_add=True)
     last_updated_time = models.DateTimeField(auto_now=True)
 
@@ -29,15 +28,13 @@ class MasUser(models.Model):
             'nick_name': self.nick_name,
             'avatar': self.avatar,
             'gender': self.gender,
-            'money': self.money,
             'created_time': int(self.created_time.timestamp()),
         }
 
         return json
 
     @classmethod
-    def create(cls, phone_number='', password='', nick_name='',
-               gender='', avatar=''):
+    def create(cls, phone_number='', password='', nick_name='', gender='', avatar=''):
         import shortuuid
 
         shortuuid.set_alphabet('0123456789')
@@ -48,6 +45,4 @@ class MasUser(models.Model):
             else:
                 break
 
-        return cls.objects.create(uid=uid, phone_number=phone_number,
-                                  password=password, nick_name=nick_name,
-                                  gender=gender, avatar=avatar)
+        return cls.objects.create(uid=int(uid), phone_number=phone_number, password=password, nick_name=nick_name, gender=gender, avatar=avatar)
