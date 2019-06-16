@@ -6,6 +6,7 @@ from common import utils
 from .models import Pet, dog_breed, cat_breed
 from relationship.models import PetRelationship
 from avatar.models import Avatar
+from score.models import PetScore
 
 
 @decorator.request_methon('POST')
@@ -115,20 +116,24 @@ def get_pet(pet_id, uid):
     获取某一宠物全部信息
     :param pet_id: 宠物 id
     :param uid: 用户 id
-    :return:
+    :return: 宠物所有相关信息
     """
     pet = Pet.objects.filter(pet_id=pet_id).first()
+
     if pet:
         pet_avatar_key = Avatar.objects.filter(own_id=pet_id).first()
+
         if pet_avatar_key:
             key = pet_avatar_key.avatar_key
             pet_avatar_url = utils.create_full_image_url([key])[0]
-            pet_relation = PetRelationship.objects.filter(pet_id=pet_id, uid=uid)\
-                .first()
+            pet_relation = PetRelationship.objects.filter(pet_id=pet_id, uid=uid).first()
+
             if pet_relation:
                 petJSON = pet.toJSON()
                 petJSON['avatar_url'] = pet_avatar_url
                 petJSON['relationship'] = pet_relation.relationship_code
+                (pet, created) = PetScore.objects.get_or_create(pet=pet)
+                petJSON['score'] = pet.toJSON()
                 return petJSON
 
 

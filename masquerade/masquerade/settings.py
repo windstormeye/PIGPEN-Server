@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'avatar',
     'pet_drink',
     'friend',
+    'score',
 ]
 
 MIDDLEWARE = [
