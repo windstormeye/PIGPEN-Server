@@ -111,6 +111,34 @@ def upload_pet_avatar_key(request):
         return utils.ErrorResponse('2333', 'keys is empty', request)
 
 
+@decorator.request_methon('GET')
+@decorator.request_check_args([])
+def get_play_details(request):
+    uid = request.GET.get('uid')
+
+    # 获取真实宠物信息
+    real_pet_array = []
+    real_pets = Pet.objects.filter(user__uid=uid)
+    for real_pet in real_pets:
+        pet_json = get_pet(real_pet.pet_id, uid)
+
+        (pet, created) = PetScore.objects.get_or_create(pet=real_pet)
+        pet_score_json = pet.toJSON()
+
+        p_json = {
+            'pet': pet_json,
+            'score': pet_score_json
+        }
+
+        real_pet_array.append(p_json)
+
+    json = {
+        'pets': real_pet_array,
+    }
+
+    return utils.SuccessResponse(json, request)
+
+
 def get_pet(pet_id, uid):
     """
     获取某一宠物全部信息
@@ -132,9 +160,9 @@ def get_pet(pet_id, uid):
                 petJSON = pet.toJSON()
                 petJSON['avatar_url'] = pet_avatar_url
                 petJSON['relationship'] = pet_relation.relationship_code
-                (pet, created) = PetScore.objects.get_or_create(pet=pet)
-                petJSON['score'] = pet.toJSON()
+
                 return petJSON
+
 
 
 # 获取所有狗品种
