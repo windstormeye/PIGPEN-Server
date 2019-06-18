@@ -10,4 +10,5 @@ urlpatterns = [
     path('pet/', include('pet.urls')),
     path('petDrink/', include('pet_drink.urls')),
     path('friend/', include('friend.urls')),
+    path('catPlay', include('play.urls')),
 ]
