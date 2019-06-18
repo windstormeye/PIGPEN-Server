@@ -51,12 +51,9 @@ def getCatPlay(request):
 
     if pet:
         if int(pet_type) == 0:
-            pet_play = CatPlay.objects.filter(pet=pet).first()
+            (pet_play, created) = CatPlay.objects.get_or_create(pet=pet)
 
-            if pet_play:
-                return utils.SuccessResponse(pet_play.toJSON(), request)
-            else:
-                return utils.ErrorResponse(2333, 'record not exist', request)
+            return utils.SuccessResponse(pet_play.toJSON(), request)
         else:
             pass
     else:
