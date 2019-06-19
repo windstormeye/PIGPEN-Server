@@ -2,6 +2,7 @@ from django.db import models
 from pet.models import Pet
 
 
+# 撸猫看板数据模型
 class CatPlay(models.Model):
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
 
@@ -22,6 +23,7 @@ class CatPlay(models.Model):
         return json
 
 
+# 每日撸猫目标模型
 class CatPlayTarget(models.Model):
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
 
@@ -32,25 +34,32 @@ class CatPlayTarget(models.Model):
     updated_time = models.DateTimeField(auto_now=True)
 
 
+# 遛狗看板数据
 class DogPlay(models.Model):
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
 
-    # 今日遛狗次数
-    times = models.IntegerField(default=0)
     # 今日消耗卡路里
     kals_today = models.IntegerField(default=0)
 
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
 
+    def toJSON(self):
+        json = {
+            'kal': int(self.kals_today),
+            'durations': int(self.kals_today) / 30,
+            'created_time': int(self.created_time.timestamp()),
+            'updated_time': int(self.updated_time.timestamp()),
+        }
+        return json
 
-class DogPlayLog(models.Model):
+
+# 每日遛狗目标模型
+class DogPlayTarget(models.Model):
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
 
-    # 今日遛狗次数
-    times = models.IntegerField(default=0)
-    # 今日消耗卡路里
-    kals_today = models.IntegerField(default=0)
+    # 默认狗狗运动量。默认每日 200 千卡
+    target = models.IntegerField(default=200)
 
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)

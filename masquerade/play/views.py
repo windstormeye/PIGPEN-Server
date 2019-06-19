@@ -1,6 +1,5 @@
 import datetime
-from django.shortcuts import render
-from .models import CatPlay, CatPlayTarget
+from .models import CatPlay, CatPlayTarget, DogPlay, DogPlayTarget
 from pet.models import Pet
 from common import utils, decorator
 
@@ -55,6 +54,62 @@ def getCatPlay(request):
 
             return utils.SuccessResponse(pet_play.toJSON(), request)
         else:
-            pass
+            return utils.ErrorResponse(2333, 'pet not cat', request)
+    else:
+        return utils.ErrorResponse(2333, 'pet not exist', request)
+
+
+@decorator.request_methon('POST')
+@decorator.request_check_args(['distance', 'pet_id', 'pet_type'])
+def updateDogPlay(request):
+    pet_id = request.POST.get('pet_id')
+    distance = request.POST.get('distance')
+    pet_type = request.POST.get('pet_type')
+
+    # 卡路里计算
+    kal = int(distance) * 30
+
+    pet = Pet.objects.filter(pet_id=pet_id).first()
+    if pet:
+
+        if int(pet_type) == 1:
+            # 每次都新建记录
+            DogPlay(pet=pet, kals_today=kal).save()
+            return utils.SuccessResponse('ok', request)
+        else:
+            return utils.ErrorResponse(2333, 'pet not dog', request)
+    else:
+        return utils.ErrorResponse(2333, 'pet not exist', request)
+
+
+@decorator.request_methon('GET')
+@decorator.request_check_args(['pet_id', 'pet_type', 'is_today'])
+def getDogPlay(request):
+    """
+    获取所有遛狗数据
+    """
+
+    pet_id = request.GET.get('pet_id')
+    pet_type = request.GET.get('pet_type')
+    is_today = request.GET.get('is_today')
+
+    pet = Pet.objects.filter(pet_id=pet_id).first()
+
+    if pet:
+        if int(pet_type) == 1:
+            pet_play_jsons = []
+
+            # 获取当天数据
+            if int(is_today) == 1:
+                dog_plays = DogPlay.objects.filter(pet=pet, created_time__gte=datetime.datetime.now().date())
+            else:
+                dog_plays = DogPlay.objects.filter(pet=pet)
+
+            for pet_play in dog_plays:
+                pet_play_jsons.append(pet_play.toJSON())
+
+            return utils.SuccessResponse(pet_play_jsons, request)
+        else:
+            return utils.ErrorResponse(2333, 'pet not dog', request)
     else:
         return utils.ErrorResponse(2333, 'pet not exist', request)
