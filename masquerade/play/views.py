@@ -51,7 +51,7 @@ def getCatPlay(request):
 
     if pet:
         if int(pet_type) == 0:
-            (pet_play, created) = CatPlay.objects.get_or_create(pet=pet)
+            (pet_play, created) = CatPlay.objects.get_or_create(pet=pet, created_time=datetime.date.today())
 
             return utils.SuccessResponse(pet_play.toJSON(), request)
         else:

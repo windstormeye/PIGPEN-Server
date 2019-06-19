@@ -30,3 +30,27 @@ class CatPlayTarget(models.Model):
 
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
+
+
+class DogPlay(models.Model):
+    pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
+
+    # 今日遛狗次数
+    times = models.IntegerField(default=0)
+    # 今日消耗卡路里
+    kals_today = models.IntegerField(default=0)
+
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now=True)
+
+
+class DogPlayLog(models.Model):
+    pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
+
+    # 今日遛狗次数
+    times = models.IntegerField(default=0)
+    # 今日消耗卡路里
+    kals_today = models.IntegerField(default=0)
+
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now=True)
