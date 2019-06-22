@@ -1,12 +1,12 @@
 import pinyin
 from django.conf import settings
-from common import decorator, masLogger
 from user.models import MasUser
-from common import utils
+from common import utils, decorator
 from .models import Pet, dog_breed, cat_breed
 from relationship.models import PetRelationship
 from avatar.models import Avatar
 from score.models import PetScore
+from play.models import DogPlayTarget
 
 
 @decorator.request_methon('POST')
@@ -43,6 +43,10 @@ def create_pet(request):
                          breed_type=breed_type,
                          food_weight=food_weight,
                          activity=activity)
+
+        if pet_type == 1:
+            DogPlayTarget(pet=pet, target=utils.dogDayTargetKcal(weight)).save()
+
         # 宠物关系实体
         relation = PetRelationship(pet_id=pet.pet_id, uid=uid,
                                    relationship_code=relation_code)

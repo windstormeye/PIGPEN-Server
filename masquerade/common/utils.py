@@ -72,3 +72,21 @@ def create_full_image_url(keys):
         image_urls.append(private_url)
 
     return image_urls
+
+
+def dogDayTargetKcal(weight):
+    """
+    狗一天所需卡路里
+    :param weight: 体重
+    :return: 卡路里
+    """
+
+    # 体重的三次方
+    weight **= 3
+    # 体重开方两次
+    weight **= 0.5
+    weight **= 0.5
+    # 每日所需千卡路里
+    kcal = weight * 125
+
+    return int(kcal)

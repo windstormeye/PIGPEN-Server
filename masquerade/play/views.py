@@ -83,28 +83,20 @@ def updateDogPlay(request):
 
 
 @decorator.request_methon('GET')
-@decorator.request_check_args(['pet_id', 'pet_type', 'is_today'])
+@decorator.request_check_args(['pet_id'])
 def getDogPlay(request):
     """
     获取所有遛狗数据
     """
 
     pet_id = request.GET.get('pet_id')
-    pet_type = request.GET.get('pet_type')
-    is_today = request.GET.get('is_today')
 
     pet = Pet.objects.filter(pet_id=pet_id).first()
-
     if pet:
-        if int(pet_type) == 1:
+        if pet.pet_type == 1:
+            dog_plays = DogPlay.objects.filter(pet=pet)
+
             pet_play_jsons = []
-
-            # 获取当天数据
-            if int(is_today) == 1:
-                dog_plays = DogPlay.objects.filter(pet=pet, created_time__gte=datetime.datetime.now().date())
-            else:
-                dog_plays = DogPlay.objects.filter(pet=pet)
-
             for pet_play in dog_plays:
                 pet_play_jsons.append(pet_play.toJSON())
 
@@ -113,3 +105,41 @@ def getDogPlay(request):
             return utils.ErrorResponse(2333, 'pet not dog', request)
     else:
         return utils.ErrorResponse(2333, 'pet not exist', request)
+
+
+@decorator.request_methon('GET')
+@decorator.request_check_args(['pet_id'])
+def getDogTodayPlay(request):
+    """
+    获取当天遛狗所有数据
+    """
+    pet_id = request.GET.get('pet_id')
+
+    pet = Pet.objects.filter(pet_id=pet_id).first()
+    if pet:
+        if pet.pet_type == 1:
+            dog_plays = DogPlay.objects.filter(pet=pet, created_time=datetime.date.today())
+
+            final_kcal = 0
+            for dog in dog_plays:
+                final_kcal += dog.kals_today
+
+            json = {
+                # 遛狗次数
+                'times': len(dog_plays),
+                # 当天遛狗总卡路里
+                'kcal_today': final_kcal,
+            }
+
+            dog_target_kcal = DogPlayTarget.objects.filter(pet=pet).first()
+            if dog_target_kcal:
+                # 该狗的每天所需卡路里
+                json['kcal_target_today'] = dog_target_kcal.target
+            else:
+                # 如果没有数据则创建一次
+                dog_target = DogPlayTarget(pet=pet, target=utils.dogDayTargetKcal(pet.weight))
+                dog_target.save()
+
+                json['kcal_target_today'] = dog_target.target
+
+            return utils.SuccessResponse(json, request)
