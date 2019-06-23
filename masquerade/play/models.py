@@ -44,10 +44,12 @@ class DogPlay(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['-created_time']
+
     def toJSON(self):
         json = {
             'kal': int(self.kals_today),
-            'durations': int(self.kals_today) / 30,
             'created_time': int(self.created_time.timestamp()),
             'updated_time': int(self.updated_time.timestamp()),
         }

@@ -60,21 +60,18 @@ def getCatPlay(request):
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['distance', 'pet_id', 'pet_type'])
+@decorator.request_check_args(['kcal', 'pet_id', 'pet_type'])
 def updateDogPlay(request):
     pet_id = request.POST.get('pet_id')
-    distance = request.POST.get('distance')
+    kcal = request.POST.get('kcal')
     pet_type = request.POST.get('pet_type')
-
-    # 卡路里计算
-    kal = int(distance) * 30
 
     pet = Pet.objects.filter(pet_id=pet_id).first()
     if pet:
 
         if int(pet_type) == 1:
             # 每次都新建记录
-            DogPlay(pet=pet, kals_today=kal).save()
+            DogPlay(pet=pet, kals_today=kcal).save()
             return utils.SuccessResponse('ok', request)
         else:
             return utils.ErrorResponse(2333, 'pet not dog', request)
@@ -118,7 +115,7 @@ def getDogTodayPlay(request):
     pet = Pet.objects.filter(pet_id=pet_id).first()
     if pet:
         if pet.pet_type == 1:
-            dog_plays = DogPlay.objects.filter(pet=pet, created_time=datetime.date.today())
+            dog_plays = DogPlay.objects.filter(pet=pet, created_time__gt=datetime.date.today())
 
             final_kcal = 0
             for dog in dog_plays:
