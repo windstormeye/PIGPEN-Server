@@ -60,18 +60,17 @@ def getCatPlay(request):
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['kcal', 'pet_id', 'pet_type'])
+@decorator.request_check_args(['kcals', 'pet_id', 'durations'])
 def updateDogPlay(request):
     pet_id = request.POST.get('pet_id')
-    kcal = request.POST.get('kcal')
-    pet_type = request.POST.get('pet_type')
+    kcal = request.POST.get('kcals')
+    durations = request.POST.get('durations')
 
     pet = Pet.objects.filter(pet_id=pet_id).first()
     if pet:
-
-        if int(pet_type) == 1:
+        if int(pet.pet_type) == 1:
             # 每次都新建记录
-            DogPlay(pet=pet, kals_today=kcal).save()
+            DogPlay(pet=pet, kals=kcal, durations=durations).save()
             return utils.SuccessResponse('ok', request)
         else:
             return utils.ErrorResponse(2333, 'pet not dog', request)
@@ -80,18 +79,19 @@ def updateDogPlay(request):
 
 
 @decorator.request_methon('GET')
-@decorator.request_check_args(['pet_id'])
+@decorator.request_check_args(['pet_id', 'page'])
 def getDogPlay(request):
     """
     获取所有遛狗数据
     """
 
     pet_id = request.GET.get('pet_id')
+    page_num = request.GET.get('page')
 
     pet = Pet.objects.filter(pet_id=pet_id).first()
     if pet:
         if pet.pet_type == 1:
-            dog_plays = DogPlay.objects.filter(pet=pet)
+            dog_plays = utils.get_page_blog_list(DogPlay.objects.filter(pet=pet), page_num)
 
             pet_play_jsons = []
             for pet_play in dog_plays:
@@ -119,7 +119,7 @@ def getDogTodayPlay(request):
 
             final_kcal = 0
             for dog in dog_plays:
-                final_kcal += dog.kals_today
+                final_kcal += dog.kals
 
             json = {
                 # 遛狗次数

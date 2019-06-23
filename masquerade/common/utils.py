@@ -20,6 +20,11 @@ def SuccessResponse(message, request):
 
 
 def get_page_blog_list(contents, page_num):
+    """
+    对集合进行分页（不管集合内容的类型）
+    :param contents: 集合内容
+    :param page_num: 当前分页
+    """
     paginator = Paginator(contents, settings.EACH_PAGE_BLOGS_NUMBER)
     page_of_contents = paginator.get_page(page_num)
 

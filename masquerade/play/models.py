@@ -38,8 +38,10 @@ class CatPlayTarget(models.Model):
 class DogPlay(models.Model):
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
 
-    # 今日消耗卡路里
-    kals_today = models.IntegerField(default=0)
+    # 本次遛狗消耗卡路里
+    kals = models.IntegerField(default=0)
+    # 本次遛狗持续时间
+    durations = models.IntegerField(default=0)
 
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
@@ -49,9 +51,8 @@ class DogPlay(models.Model):
 
     def toJSON(self):
         json = {
-            'kal': int(self.kals_today),
-            'created_time': int(self.created_time.timestamp()),
-            'updated_time': int(self.updated_time.timestamp()),
+            'kcals': int(self.kals),
+            'durations': int(self.durations),
         }
         return json
 
