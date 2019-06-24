@@ -1,4 +1,4 @@
-import datetime
+import datetime, time
 from .models import CatPlay, CatPlayTarget, DogPlay, DogPlayTarget
 from pet.models import Pet
 from common import utils, decorator
@@ -94,9 +94,37 @@ def getDogPlay(request):
             dog_plays = utils.get_page_blog_list(DogPlay.objects.filter(pet=pet), page_num)
 
             pet_play_jsons = []
-            for pet_play in dog_plays:
-                pet_play_jsons.append(pet_play.toJSON())
+            pet_day_play_json = []
+            current_day = 0
+            current_timestamp = 0
 
+            for pet_play in dog_plays:
+                # 新的一天
+                if current_day == 0:
+                    current_day = pet_play.created_time.day
+                    current_timestamp = int(pet_play.created_time.timestamp())
+                    pet_day_play_json.append(pet_play.toJSON())
+                else:
+                    if pet_play.created_time.day == current_day:
+                        pet_day_play_json.append(pet_play.toJSON())
+                    else:
+                        json = {
+                            'date': current_timestamp,
+                            'plays': pet_day_play_json
+                        }
+                        pet_play_jsons.append(json)
+
+                        # 清空数据
+                        pet_day_play_json = []
+                        current_day = pet_play.created_time.day
+                        pet_day_play_json.append(pet_play.toJSON())
+
+            # 最后一天
+            json = {
+                'date': current_timestamp,
+                'plays': pet_day_play_json
+            }
+            pet_play_jsons.append(json)
             return utils.SuccessResponse(pet_play_jsons, request)
         else:
             return utils.ErrorResponse(2333, 'pet not dog', request)
