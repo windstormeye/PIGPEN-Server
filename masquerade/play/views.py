@@ -60,10 +60,10 @@ def getCatPlay(request):
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['kcals', 'pet_id', 'durations'])
+@decorator.request_check_args(['kcal', 'pet_id', 'durations'])
 def updateDogPlay(request):
     pet_id = request.POST.get('pet_id')
-    kcal = request.POST.get('kcals')
+    kcal = request.POST.get('kcal')
     durations = request.POST.get('durations')
 
     pet = Pet.objects.filter(pet_id=pet_id).first()
