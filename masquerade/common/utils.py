@@ -107,3 +107,12 @@ def dogDayStaticKcal(weight):
     weight **= 0.75
     kcal = weight * 70
     return kcal
+
+
+def petTargetDrink(pet):
+    # 猫
+    if pet.pet_type == 0:
+        pass
+    # 狗
+    else:
+        pass
