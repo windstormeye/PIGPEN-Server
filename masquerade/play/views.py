@@ -116,7 +116,8 @@ def getDogPlay(request):
 
                         # 清空数据
                         pet_day_play_json = []
-                        current_day = pet_play.created_time.day
+                        current_day = 0
+                        current_timestamp = int(pet_play.created_time.timestamp())
                         pet_day_play_json.append(pet_play.toJSON())
 
             # 最后一天
