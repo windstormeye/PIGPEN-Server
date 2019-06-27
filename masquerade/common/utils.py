@@ -83,15 +83,27 @@ def dogDayTargetKcal(weight):
     """
     狗一天所需卡路里
     :param weight: 体重
-    :return: 卡路里
+    :return: 每日所需卡路里
     """
-
+    static_kcal = dogDayStaticKcal(weight)
     # 体重的三次方
     weight **= 3
     # 体重开方两次
     weight **= 0.5
     weight **= 0.5
     # 每日所需千卡路里
-    kcal = weight * 125
+    kcal = weight * 125 - static_kcal
 
     return int(kcal)
+
+
+def dogDayStaticKcal(weight):
+    """
+    狗狗一天的静息卡路里
+    :param weight: 体重
+    :return: 静息卡路里
+    """
+
+    weight **= 0.75
+    kcal = weight * 70
+    return kcal
