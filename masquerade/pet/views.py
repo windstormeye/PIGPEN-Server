@@ -7,6 +7,7 @@ from relationship.models import PetRelationship
 from avatar.models import Avatar
 from score.models import PetScore
 from play.models import DogPlayTarget
+from drink.models import Drink
 
 
 @decorator.request_methon('POST')
@@ -45,7 +46,11 @@ def create_pet(request):
                          activity=activity)
 
         if pet_type == 1:
+            # 狗狗每日所需运动卡路里
             DogPlayTarget(pet=pet, target=utils.dogDayTargetKcal(weight)).save()
+
+        # 宠物每日所需饮水量
+        Drink(pet=pet, waters=utils.petTargetDrink(pet))
 
         # 宠物关系实体
         relation = PetRelationship(pet_id=pet.pet_id, uid=uid,
@@ -55,10 +60,10 @@ def create_pet(request):
         # 宠物头像
         Avatar(own_id=pet.pet_id, avatar_key=avatar_key).save()
 
-        petJSON = pet.toJSON()
-        petJSON['avatar_url'] = utils.create_full_image_url([avatar_key])[0]
-        petJSON['relationship'] = int(relation.relationship_code)
-        return utils.SuccessResponse(petJSON, request)
+        pet_json = pet.toJSON()
+        pet_json['avatar_url'] = utils.create_full_image_url([avatar_key])[0]
+        pet_json['relationship'] = int(relation.relationship_code)
+        return utils.SuccessResponse(pet_json, request)
     else:
         return utils.ErrorResponse('2333', 'user not exist', request)
 

@@ -1,9 +1,12 @@
+import datetime
 import time
-from django.http import JsonResponse
-from django.core.paginator import Paginator
+
 from django.conf import settings
-from common import masLogger
+from django.core.paginator import Paginator
+from django.http import JsonResponse
 from qiniu import Auth
+
+from common import masLogger
 
 
 def ErrorResponse(code, message, request):
@@ -110,9 +113,21 @@ def dogDayStaticKcal(weight):
 
 
 def petTargetDrink(pet):
+    """
+    根据宠物体重和年龄计算每日所需水量
+    :param pet: 宠物实体
+    :return: 宠物每日所需水量
+    """
     # 猫
     if pet.pet_type == 0:
-        pass
+        # 1kg * 30ml
+        return pet.weight * 30
     # 狗
     else:
-        pass
+        total_month = (datetime.datetime.now().timestamp() - pet.created_time.timestamp()) / 86400 / 30
+        # 幼年犬
+        if total_month < 16:
+            return pet.weight * 160
+        # 成年犬
+        else:
+            return pet.weight * 110
