@@ -3,6 +3,9 @@ from pet.models import Pet
 
 
 class PetScore(models.Model):
+    """
+    娱乐圈-首页-宠物看板分数
+    """
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
 
     food_s = models.DecimalField(max_digits=3, decimal_places=2, default=8.00)

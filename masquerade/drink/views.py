@@ -1,7 +1,7 @@
 import datetime
 from common import utils, decorator
 from pet.models import Pet
-from .models import Drink, DrinkTarget
+from .models import Drink, DrinkTarget, DrinkActivity
 
 
 @decorator.request_methon('POST')
@@ -132,3 +132,40 @@ def day(request):
         return utils.SuccessResponse(json, request)
     else:
         return utils.ErrorResponse(2333, 'Not Found', request)
+
+
+def updateLastWaters(pet, waters):
+    """
+    更新宠物剩余水量
+    """
+
+    (drink_activity, created) = DrinkActivity.objects.get_or_create(pet=pet)
+    if created:
+        # 设置当前剩水量
+        drink_activity.current_waters = waters
+        # 每分钟消耗量
+        expend_waters_min = DrinkTarget.objects.filter(pet=pet).first().target / 3600
+        # 可消耗时间间隔
+        finished_time_interval = waters * expend_waters_min
+        # 可消耗时间
+        finished_time = datetime.datetime.now().timestamp() + finished_time_interval
+        # 设置「水量预计喝完时间」
+        drink_activity.finished_time = finished_time
+        # 保存
+        drink_activity.save()
+    else:
+        # 解释：不管是否缺水，只要加了水，分数给满，重新扣分。
+
+        # 判断「水量预计喝完时间」与现在时间戳相比
+        # 经过时间戳 = 现在时间戳 - 「水量预计喝完时间」
+        # 大于
+            # 扣除的分数 = 每分钟耗费分数 * 经过时间戳
+            # 入库分数 = 现有分数 - 扣除分数（进「分数记录」表）
+            # 更新分数 = 10 分
+        # 经过时间里耗费的水量 = 经过时间戳 * 每分钟消耗量
+        # 更新剩余水量
+        # 当前剩水量 = 原有剩余水量 - 经过时间里耗费的水量
+        # 当前剩水量 += 新增水量
+        # 更新「水量预计喝完时间」
+        pass
+
