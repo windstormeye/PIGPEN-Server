@@ -17,6 +17,7 @@ def create(request):
     pet = Pet.objects.filter(pet_id=pet_id).first()
     if pet:
         Drink(pet=pet, waters=waters).save()
+        updateLastWaters(pet, int(waters))
         return utils.SuccessResponse('ok', request)
     else:
         return utils.ErrorResponse(2333, 'Not Found', request)
@@ -138,56 +139,63 @@ def day(request):
 def updateLastWaters(pet, waters):
     """
     更新宠物剩余水量
+    :param pet:  宠物实体
+    :param waters: 当前宠物喂水量。小于 0 则为查分
     """
 
     (drink_activity, created) = DrinkActivity.objects.get_or_create(pet=pet)
-    if created:
+    if created and waters > 0:
         # 设置当前剩水量
         drink_activity.current_waters = waters
         # 每分钟消耗量
-        expend_waters_min = DrinkTarget.objects.filter(pet=pet).first().target / 3600
+        expend_waters_min = DrinkTarget.objects.filter(pet=pet).first().target / 1440
     else:
         # 解释：不管是否缺水，只要加了水，分数给满，重新扣分。
 
         # 判断「水量预计喝完时间」与现在时间戳相比
         now_timestamp = int(datetime.datetime.now().timestamp())
-        finished_timestamp = int(drink_activity.finished_time.timestamp())
-        # 经过时间戳 = 现在时间戳 - 「水量预计喝完时间」
-        drink_interval = finished_timestamp - now_timestamp
+        finished_timestamp = drink_activity.finished_time
+        last_updated_timestamp = int(drink_activity.updated_time.timestamp())
+        # 经过时间戳 = 现在时间戳 - 上一次更新时间戳
+        drink_interval = now_timestamp - last_updated_timestamp
 
-        # 大于
-        if finished_timestamp > now_timestamp:
+        # TODO: 分数预计还没测
+        # 「水量预计喝完时间」是否小于当前时间戳
+        if finished_timestamp < now_timestamp:
             # 扣除的分数 = 每分钟耗费分数 * 经过分钟
             deduct_score = (10 / 60) * (drink_interval / 60)
             # 入库分数 = 现有分数 - 扣除分数（进「分数记录」表）
-            current_drink_score = DrinkDayScore.objects.filter(pet=pet).first()
+            (current_drink_score, is_created) = DrinkDayScore.objects.get_or_create(pet=pet)
             write_score = current_drink_score.score - deduct_score
             # 分数入记录表
             DrinkScore(pet=pet, score=write_score).save()
-            # 更新分数 = 10 分
-            current_drink_score.score = 10
-            current_drink_score.save()
+
+            if waters > 0:
+                # 更新分数 = 10 分
+                current_drink_score.score = 10
+                current_drink_score.save()
+
         # 经过时间里耗费的水量 = 经过时间戳 * 每分钟消耗量
-        expend_waters_min = DrinkTarget.objects.filter(pet=pet).first().target / 3600
-        expend_waters = drink_interval * expend_waters_min
+        expend_waters_min = DrinkTarget.objects.filter(pet=pet).first().target / 1440
+        expend_waters = drink_interval / 60 * expend_waters_min
         # 当前剩水量 = 原有剩余水量 - 经过时间里耗费的水量
-        drink_activity.current_waters -= expend_waters
+        drink_activity.current_waters = float(drink_activity.current_waters) - expend_waters
 
         # 如果此时小于等于 0
         if drink_activity.current_waters <= 0:
             # 小于 0，就是没水了，不管
             drink_activity.current_waters = 0
 
-        # 当前剩水量 += 新增水量
-        drink_activity.current_waters += waters
+        if waters > 0:
+            # 当前剩水量 += 新增水量
+            drink_activity.current_waters += waters
 
-    # 更新「水量预计喝完时间」
-    # 可消耗时间间隔
-    finished_time_interval = waters * expend_waters_min
-    # 可消耗时间
-    finished_time = datetime.datetime.now().timestamp() + finished_time_interval
-    # 设置「水量预计喝完时间」
-    drink_activity.finished_time = finished_time
-    # 保存
-    drink_activity.save()
+    if waters > 0:
+        # 更新「水量预计喝完时间」
+        # 可消耗时间间隔
+        finished_time_interval = waters / expend_waters_min
+        # 设置「水量预计喝完时间」
+        drink_activity.finished_time += finished_time_interval * 60
+        # 保存
+        drink_activity.save()
 

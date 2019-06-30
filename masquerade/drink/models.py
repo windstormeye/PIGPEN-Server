@@ -49,10 +49,13 @@ class DrinkActivity(models.Model):
 
     # 当前水量
     # 整数最多五位数，小数占一位
-    current_waters = models.DecimalField(max_digits=5, decimal_places=1)
+    current_waters = models.DecimalField(max_digits=5, decimal_places=1, default=0)
 
-    created_time = models.DateTimeField(auto_now_add=True)
     # 预计消耗完成时间（时间戳）
     finished_time = models.IntegerField(default=0)
+
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now=True)
+
 
 
