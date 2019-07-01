@@ -132,6 +132,13 @@ def day(request):
 
             json['water_target_today'] = pet_target.target
 
+        # 先更新宠物当前喝水评分
+        updateLastWaters(pet, 0)
+        # 查找出宠物当天的分数
+        drink_day_score = DrinkDayScore.objects.filter(pet=pet).first()
+        if drink_day_score:
+            json['score'] = drink_day_score.score
+
         return utils.SuccessResponse(json, request)
     else:
         return utils.ErrorResponse(2333, 'Not Found', request)
