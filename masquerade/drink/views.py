@@ -137,7 +137,7 @@ def day(request):
         # 查找出宠物当天的分数
         drink_day_score = DrinkDayScore.objects.filter(pet=pet).first()
         if drink_day_score:
-            json['score'] = drink_day_score.score
+            json['score'] = float(drink_day_score.score)
 
         return utils.SuccessResponse(json, request)
     else:
@@ -173,7 +173,11 @@ def updateLastWaters(pet, waters):
             deduct_score = (10 / 1440) * (drink_interval / 60)
             # 入库分数 = 现有分数 - 扣除分数（进「分数记录」表）
             (current_drink_score, is_created) = DrinkDayScore.objects.get_or_create(pet=pet)
+
             write_score = float(current_drink_score.score) - deduct_score
+            if write_score < 0:
+                write_score = 0
+
             final_write_score = utils.get_two_float(str(write_score), 1)
             # 分数入记录表
             DrinkScore(pet=pet, score=Decimal(final_write_score)).save()
