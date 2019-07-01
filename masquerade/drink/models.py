@@ -21,7 +21,6 @@ class Drink(models.Model):
 
     def toJSON(self):
         json = {
-            'id': self.id,
             'waters': int(self.waters),
             'created_time': int(self.created_time.timestamp())
         }
