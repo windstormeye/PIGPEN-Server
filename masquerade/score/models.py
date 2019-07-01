@@ -46,12 +46,12 @@ class DrinkDayScore(models.Model):
 
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
     # 当前分数
-    score = models.DecimalField(max_digits=2, decimal_places=1, default=8.0)
+    score = models.DecimalField(max_digits=3, decimal_places=1, default=8.0)
     # 第一个时间段
-    first_score = models.DecimalField(max_digits=2, decimal_places=1, default=0)
+    first_score = models.DecimalField(max_digits=3, decimal_places=1, default=0)
     # 第二个时间段
-    second_score = models.DecimalField(max_digits=2, decimal_places=1, default=0)
+    second_score = models.DecimalField(max_digits=3, decimal_places=1, default=0)
     # 第三个时间段
-    third_score = models.DecimalField(max_digits=2, decimal_places=1, default=0)
+    third_score = models.DecimalField(max_digits=3, decimal_places=1, default=0)
 
     created_time = models.DateTimeField(auto_now_add=True)

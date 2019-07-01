@@ -1,4 +1,5 @@
 import datetime
+from decimal import Decimal
 from common import utils, decorator
 from pet.models import Pet
 from .models import Drink, DrinkTarget, DrinkActivity
@@ -159,11 +160,10 @@ def updateLastWaters(pet, waters):
         # 经过时间戳 = 现在时间戳 - 上一次更新时间戳
         drink_interval = now_timestamp - last_updated_timestamp
 
-        # TODO: 分数预计还没测
         # 「水量预计喝完时间」是否小于当前时间戳
         if finished_timestamp < now_timestamp:
             # 扣除的分数 = 每分钟耗费分数 * 经过分钟
-            deduct_score = (10 / 60) * (drink_interval / 60)
+            deduct_score = (10 / 1440) * (drink_interval / 60)
             # 入库分数 = 现有分数 - 扣除分数（进「分数记录」表）
             (current_drink_score, is_created) = DrinkDayScore.objects.get_or_create(pet=pet)
             write_score = current_drink_score.score - deduct_score
@@ -172,7 +172,7 @@ def updateLastWaters(pet, waters):
 
             if waters > 0:
                 # 更新分数 = 10 分
-                current_drink_score.score = 10
+                current_drink_score.score = Decimal(str(10.0))
                 current_drink_score.save()
 
         # 经过时间里耗费的水量 = 经过时间戳 * 每分钟消耗量
