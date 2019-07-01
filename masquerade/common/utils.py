@@ -131,3 +131,15 @@ def petTargetDrink(pet):
         # 成年犬
         else:
             return pet.weight * 110
+
+
+def get_two_float(f_str, n):
+    """
+    保留任意位小数，不四舍五入
+    :param f_str: 原字符串
+    :param n: 小数位数
+    :return: 处理完成的字符串
+    """
+    a, b, c = f_str.partition('.')
+    c = c[:n]
+    return ".".join([a, c])

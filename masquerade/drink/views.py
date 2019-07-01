@@ -82,10 +82,10 @@ def all(request):
                     pet_drinks_jsons.append(json)
 
                     # 清空数据
-                    pet_day_play_json = []
+                    pet_day_drinks_json = []
                     current_day = 0
                     current_timestamp = int(pet_drink.created_time.timestamp())
-                    pet_day_play_json.append(pet_drink.toJSON())
+                    pet_day_drinks_json.append(pet_drink.toJSON())
 
         # 最后一天
         json = {
@@ -166,14 +166,17 @@ def updateLastWaters(pet, waters):
             deduct_score = (10 / 1440) * (drink_interval / 60)
             # 入库分数 = 现有分数 - 扣除分数（进「分数记录」表）
             (current_drink_score, is_created) = DrinkDayScore.objects.get_or_create(pet=pet)
-            write_score = current_drink_score.score - deduct_score
+            write_score = float(current_drink_score.score) - deduct_score
+            final_write_score = utils.get_two_float(str(write_score), 1)
             # 分数入记录表
-            DrinkScore(pet=pet, score=write_score).save()
+            DrinkScore(pet=pet, score=Decimal(final_write_score)).save()
 
             if waters > 0:
                 # 更新分数 = 10 分
                 current_drink_score.score = Decimal(str(10.0))
-                current_drink_score.save()
+            else:
+                current_drink_score.score = Decimal(str(write_score))
+            current_drink_score.save()
 
         # 经过时间里耗费的水量 = 经过时间戳 * 每分钟消耗量
         expend_waters_min = DrinkTarget.objects.filter(pet=pet).first().target / 1440

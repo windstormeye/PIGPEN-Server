@@ -34,7 +34,7 @@ class DrinkScore(models.Model):
 
     pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
     # 只保留两位小数
-    score = models.DecimalField(max_digits=2, decimal_places=1, default=8.0)
+    score = models.DecimalField(max_digits=3, decimal_places=1, default=8.0)
 
     created_time = models.DateTimeField(auto_now_add=True)
 
@@ -55,3 +55,13 @@ class DrinkDayScore(models.Model):
     third_score = models.DecimalField(max_digits=3, decimal_places=1, default=0)
 
     created_time = models.DateTimeField(auto_now_add=True)
+
+    def toJSON(self):
+        json = {
+            'current_score': self.score,
+            'first_score': self.first_score,
+            'second_score': self.second_score,
+            'third_sccore': self.third_score,
+        }
+
+        return json
