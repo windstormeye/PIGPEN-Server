@@ -7,21 +7,26 @@ from score.models import DrinkDayScore, DrinkScore
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['pet_id', 'waters'])
+@decorator.request_check_args(['pet_ids', 'waters'])
 def create(request):
     """
     创建宠物 宠物水量
     """
-    pet_id = request.POST.get('pet_id')
+    pet_ids = request.POST.get('pet_ids')
     waters = request.POST.get('waters')
 
-    pet = Pet.objects.filter(pet_id=pet_id).first()
-    if pet:
-        Drink(pet=pet, waters=waters).save()
-        updateLastWaters(pet, int(waters))
-        return utils.SuccessResponse('ok', request)
-    else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+    pet_ids = pet_ids.split(',')
+
+    for (index, pet_id) in enumerate(pet_ids):
+        pet = Pet.objects.filter(pet_id=pet_id).first()
+        if pet:
+            Drink(pet=pet, waters=waters).save()
+            updateLastWaters(pet, int(waters))
+
+            if index == len(pet_ids) - 1:
+                return utils.SuccessResponse('ok', request)
+        else:
+            return utils.ErrorResponse(2333, 'Not Found', request)
 
 
 @decorator.request_methon('POST')
@@ -152,11 +157,18 @@ def updateLastWaters(pet, waters):
     """
 
     (drink_activity, created) = DrinkActivity.objects.get_or_create(pet=pet)
+    # 第一次喝水的时候不会直接给满 10 分，如果要给也可以
     if created and waters > 0:
         # 设置当前剩水量
         drink_activity.current_waters = waters
+
+        drink_target = DrinkTarget.objects.filter(pet=pet).first()
+        if not drink_target:
+            drink_target = DrinkTarget(pet=pet, target=utils.petTargetDrink(pet))
+            drink_target.save()
+
         # 每分钟消耗量
-        expend_waters_min = DrinkTarget.objects.filter(pet=pet).first().target / 1440
+        expend_waters_min = drink_target.target / 1440
     else:
         # 解释：不管是否缺水，只要加了水，分数给满，重新扣分。
 
