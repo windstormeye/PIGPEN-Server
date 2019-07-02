@@ -65,3 +65,43 @@ class DrinkDayScore(models.Model):
         }
 
         return json
+
+
+class EatScore(models.Model):
+    """
+    宠物吃饭评分总记录
+    """
+
+    pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
+    # 只保留两位小数
+    score = models.DecimalField(max_digits=3, decimal_places=1, default=8.0)
+
+    created_time = models.DateTimeField(auto_now_add=True)
+
+
+class EatDayScore(models.Model):
+    """
+    宠物当天吃饭评分记录
+    """
+
+    pet = models.ForeignKey(Pet, on_delete=models.CASCADE)
+    # 当前分数
+    score = models.DecimalField(max_digits=3, decimal_places=1, default=8.0)
+    # 第一个时间段
+    first_score = models.DecimalField(max_digits=3, decimal_places=1, default=0)
+    # 第二个时间段
+    second_score = models.DecimalField(max_digits=3, decimal_places=1, default=0)
+    # 第三个时间段
+    third_score = models.DecimalField(max_digits=3, decimal_places=1, default=0)
+
+    created_time = models.DateTimeField(auto_now_add=True)
+
+    def toJSON(self):
+        json = {
+            'current_score': self.score,
+            'first_score': self.first_score,
+            'second_score': self.second_score,
+            'third_sccore': self.third_score,
+        }
+
+        return json

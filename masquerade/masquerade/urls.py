@@ -12,5 +12,6 @@ urlpatterns = [
     path('friend/', include('friend.urls')),
     path('play/', include('play.urls')),
     path('drink/', include('drink.urls')),
-    path('score/', include('score.urls'))
+    path('score/', include('score.urls')),
+    path('eat/', include('eat.urls')),
 ]

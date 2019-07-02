@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'score',
     'play',
     'drink',
+    'eat'
 ]
 
 MIDDLEWARE = [

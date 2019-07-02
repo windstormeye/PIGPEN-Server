@@ -1,14 +1,15 @@
 from common import token_utils, utils, decorator, masLogger
 from pet.models import Pet
 from drink import views as drink_views
-from .models import DrinkDayScore
+from eat import views as eat_views
+from .models import DrinkDayScore, EatDayScore
 
 
 @decorator.request_methon('GET')
 @decorator.request_check_args(['pet_id'])
-def get(request):
+def drinkGet(request):
     """
-    获取宠物当天评分
+    获取宠物当天喝水评分
     """
     pet_id = request.GET.get('pet_id')
 
@@ -22,3 +23,19 @@ def get(request):
         return utils.ErrorResponse(2333, 'Not Found', request)
 
 
+@decorator.request_methon('GET')
+@decorator.request_check_args(['pet_id'])
+def eatGet(request):
+    """
+    获取宠物当天吃饭评分
+    """
+    pet_id = request.GET.get('pet_id')
+
+    pet = Pet.objects.filter(pet_id=pet_id).first()
+    if pet:
+        eat_views.updateLastFoods(pet, 0)
+        current_eat_score = EatDayScore.objects.filter(pet=pet).first()
+        if current_eat_score:
+            return utils.SuccessResponse(current_eat_score.toJSON(), request)
+    else:
+        return utils.ErrorResponse(2333, 'Not Found', request)
