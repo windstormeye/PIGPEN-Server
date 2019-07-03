@@ -26,6 +26,23 @@ def create(request):
 
 
 @decorator.request_methon('POST')
+@decorator.request_check_args(['pet_id', 'drink_id'])
+def delete(request):
+    """
+    删除宠物喝水记录
+    """
+    pet_id = request.POST.get('pet_id')
+    drink_id = request.POST.get('drink_id')
+
+    pet = Pet.objects.filter(pet_id=pet_id).first()
+    if pet:
+        Drink.objects.filter(id=drink_id).delete()
+        return utils.SuccessResponse('ok', request)
+    else:
+        return utils.ErrorResponse(2333, 'Not Found', request)
+
+
+@decorator.request_methon('POST')
 @decorator.request_check_args(['pet_id', 'drink_id', 'waters'])
 def update(request):
     """

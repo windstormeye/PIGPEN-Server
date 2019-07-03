@@ -7,4 +7,5 @@ urlpatterns = [
     path('dog', views.getDogPlay),
     path('updateDog', views.updateDogPlay),
     path('dogTodayPlay', views.getDogTodayPlay),
+    path('delete', views.delete),
 ]

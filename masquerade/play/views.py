@@ -60,6 +60,29 @@ def getCatPlay(request):
 
 
 @decorator.request_methon('POST')
+@decorator.request_check_args(['pet_id', 'play_id', 'pet_type'])
+def delete(request):
+    """
+    删除宠物「玩」记录
+    """
+    pet_id = request.POST.get('pet_id')
+    pet_type = request.POST.get('pet_type')
+    play_id = request.POST.get('play_id')
+
+    pet = Pet.objects.filter(pet_id=pet_id).first()
+    if pet:
+        # 猫
+        if pet_type == 0:
+            CatPlay.objects.filter(id=play_id).delete()
+            return utils.SuccessResponse('ok', request)
+        else:
+            DogPlay.objects.filter(id=play_id).delete()
+            return utils.SuccessResponse('ok', request)
+    else:
+        return utils.ErrorResponse(2333, 'Not Found', request)
+
+
+@decorator.request_methon('POST')
 @decorator.request_check_args(['kcal', 'pet_id', 'durations'])
 def updateDogPlay(request):
     pet_id = request.POST.get('pet_id')

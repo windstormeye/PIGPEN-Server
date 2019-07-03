@@ -51,6 +51,7 @@ class DogPlay(models.Model):
 
     def toJSON(self):
         json = {
+            'id': self.id,
             'kcals': int(self.kals),
             'durations': int(self.durations),
         }

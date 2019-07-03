@@ -19,6 +19,7 @@ class Eat(models.Model):
 
     def toJSON(self):
         json = {
+            'id': self.id,
             'foods': int(self.foods),
             'created_time': int(self.created_time.timestamp())
         }
