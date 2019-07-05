@@ -3,7 +3,7 @@ from django.db.models import ObjectDoesNotExist
 from .models import LikeCount, LikeRecord
 from user.models import MasUser
 from blog.models import Blog
-from common import utils, decorator, masLogger
+from common import utils, decorator
 
 
 @decorator.request_methon('POST')

@@ -1,44 +1,54 @@
 from django.contrib.contenttypes.models import ContentType
 from .models import Blog
-from user.models import MasUser
+from pet.models import Pet
 from read_statistics.models import ReadNumber
 from like_statistics.models import LikeCount
 from comment.models import Comment
-from common import utils, decorator, masLogger
+from common import utils, decorator
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['content'])
+@decorator.request_check_args(['content', 'imgs', 'pet_ids'])
 def create_blog(request):
-    masuserId = request.POST.get('masuser_id', '')
+    pet_ids = request.POST.get('pet_ids')
+    imgs = request.POST.get('imgs', '')
     content = request.POST.get('content', '')
-    masuser = MasUser.objects.filter(pk=masuserId).first()
-    if masuser:
-        return utils.ErrorResponse(2333, '用户不存在', request)
-    Blog(content=content, masuser=masuser).save()
-    return utils.SuccessResponse('发布成功', request)
+
+    for pet_id in pet_ids:
+        Blog(pet_id=pet_id, content=content, imgs=imgs).save()
+
+    return utils.SuccessResponse('ok', request)
 
 
 @decorator.request_methon('GET')
 @decorator.request_check_args(['page'])
 def blog_list(request):
     page_num = request.GET.get('page')
-    blogs = utils.get_page_blog_list(Blog.objects.filter(is_deleted=0).
-                                     values(), page_num)
+
+    blogs = utils.get_page_blog_list(Blog.objects.filter(is_deleted=0), page_num)
     final_blogs = []
     for blog in blogs:
-        masuserId = blog['masuser_id']
-        masuser = MasUser.objects.get(pk=masuserId)
-        # replace field `masuser`
-        blog['masuser'] = masuser.toJSON()
+        blog_json = {}
 
-        # get blog read_num
+        pet = Pet.objects.filter(id=blog.pet.id).first()
+
+        blog_json['pet'] = pet.toPureJSON()
+        blog_json['blog'] = blog.toJSON()
+
         content_type = ContentType.objects.get(model='blog')
-        readnum, create = ReadNumber.objects.get_or_create(
-            content_type=content_type, object_id=blog['id'])
-        blog['read_num'] = readnum.read_num
 
-        final_blogs.append(blog)
+        # 该篇文章的阅读数
+        read_num, created = ReadNumber.objects.get_or_create(content_type=content_type,
+                                                             object_id=blog.id)
+        blog_json['read_num'] = read_num.read_num
+
+        # 该篇文章的点赞数
+        like_num, created = LikeCount.objects.get_or_create(content_type=content_type,
+                                                            object_id=blog.id)
+        blog_json['like_num'] = like_num.liked_num
+
+        final_blogs.append(blog_json)
+
     json = {
         'blogs': list(final_blogs),
     }
