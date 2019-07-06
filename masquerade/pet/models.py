@@ -49,19 +49,13 @@ class Pet(models.Model):
             'activity': int(self.activity),
             'food_weight': int(self.food_weight)
         }
-        return json
-
-    def toPureJSON(self):
-        pet_json = {
-            'nickname': self.nick_name
-        }
 
         pet_avatar_key = Avatar.objects.filter(own_id=self.pet_id).first()
         if pet_avatar_key:
             key = pet_avatar_key.avatar_key
-            pet_json['avatar_url'] = utils.create_full_image_url([key])[0]
+            json['avatar_url'] = utils.create_full_image_url([key])[0]
 
-        return pet_json
+        return json
 
     @classmethod
     def create(cls, user, pet_nick_name, pet_type, weight, ppp_status, love_status,

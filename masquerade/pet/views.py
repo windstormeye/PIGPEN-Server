@@ -61,7 +61,6 @@ def create_pet(request):
         Avatar(own_id=pet.pet_id, avatar_key=avatar_key).save()
 
         pet_json = pet.toJSON()
-        pet_json['avatar_url'] = utils.create_full_image_url([avatar_key])[0]
         pet_json['relationship'] = int(relation.relationship_code)
         return utils.SuccessResponse(pet_json, request)
     else:
@@ -158,19 +157,13 @@ def get_pet(pet_id, uid):
     pet = Pet.objects.filter(pet_id=pet_id).first()
 
     if pet:
-        pet_avatar_key = Avatar.objects.filter(own_id=pet_id).first()
+        pet_relation = PetRelationship.objects.filter(pet_id=pet_id, uid=uid).first()
+        if pet_relation:
+            pet_json = pet.toJSON()
+            pet_json['relationship'] = pet_relation.relationship_code
 
-        if pet_avatar_key:
-            key = pet_avatar_key.avatar_key
-            pet_avatar_url = utils.create_full_image_url([key])[0]
-            pet_relation = PetRelationship.objects.filter(pet_id=pet_id, uid=uid).first()
+            return pet_json
 
-            if pet_relation:
-                petJSON = pet.toJSON()
-                petJSON['avatar_url'] = pet_avatar_url
-                petJSON['relationship'] = pet_relation.relationship_code
-
-                return petJSON
 
 
 

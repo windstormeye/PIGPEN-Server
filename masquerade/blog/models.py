@@ -1,5 +1,6 @@
 from django.db import models
 from pet.models import Pet
+from common import utils
 
 
 class BlogType(models.Model):
@@ -26,9 +27,9 @@ class Blog(models.Model):
     def toJSON(self):
         json = {
             'content': self.content,
-            'imgs': self.imgs,
-            'created_time': self.created_time,
-            'updated_time': self.last_updated_time
+            'imgs': utils.create_full_image_url([self.imgs])[0],
+            'createdTime': int(self.created_time.timestamp()),
+            'updatedTime': int(self.last_updated_time.timestamp())
         }
 
         return json

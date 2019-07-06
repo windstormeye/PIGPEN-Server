@@ -8,14 +8,20 @@ from common import utils, decorator
 
 
 @decorator.request_methon('POST')
-@decorator.request_check_args(['content', 'imgs', 'pet_ids'])
+@decorator.request_check_args(['content', 'imgs', 'petIds'])
 def create_blog(request):
-    pet_ids = request.POST.get('pet_ids')
-    imgs = request.POST.get('imgs', '')
-    content = request.POST.get('content', '')
+    pet_ids = request.POST.get('petIds')
+    imgs = request.POST.get('imgs')
+    content = request.POST.get('content')
 
+    pet_ids = pet_ids.split(',')
     for pet_id in pet_ids:
-        Blog(pet_id=pet_id, content=content, imgs=imgs).save()
+        if pet_id != "":
+            pet = Pet.objects.filter(pet_id=pet_id).first()
+            if pet:
+                Blog(pet=pet, content=content, imgs=imgs).save()
+            else:
+                utils.ErrorResponse(2333, 'Pet Not Found', request)
 
     return utils.SuccessResponse('ok', request)
 
@@ -32,20 +38,22 @@ def blog_list(request):
 
         pet = Pet.objects.filter(id=blog.pet.id).first()
 
-        blog_json['pet'] = pet.toPureJSON()
-        blog_json['blog'] = blog.toJSON()
+        blog_json['pet'] = pet.toJSON()
+
+        blog_content_json = blog.toJSON()
 
         content_type = ContentType.objects.get(model='blog')
-
         # 该篇文章的阅读数
         read_num, created = ReadNumber.objects.get_or_create(content_type=content_type,
                                                              object_id=blog.id)
-        blog_json['read_num'] = read_num.read_num
+        blog_content_json['readCount'] = read_num.read_num
 
         # 该篇文章的点赞数
         like_num, created = LikeCount.objects.get_or_create(content_type=content_type,
                                                             object_id=blog.id)
-        blog_json['like_num'] = like_num.liked_num
+        blog_content_json['likeCount'] = like_num.liked_num
+
+        blog_json['blog'] = blog_content_json
 
         final_blogs.append(blog_json)
 
