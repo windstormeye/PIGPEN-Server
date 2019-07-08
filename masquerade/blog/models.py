@@ -26,6 +26,7 @@ class Blog(models.Model):
 
     def toJSON(self):
         json = {
+            'id': self.id,
             'content': self.content,
             'imgs': utils.create_full_image_url([self.imgs])[0],
             'createdTime': int(self.created_time.timestamp()),

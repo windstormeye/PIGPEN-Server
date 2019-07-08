@@ -2,7 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from .models import Blog
 from pet.models import Pet
 from read_statistics.models import ReadNumber
-from like_statistics.models import LikeCount
+from like_statistics.models import LikeCount, LikeRecord
 from comment.models import Comment
 from common import utils, decorator
 
@@ -30,6 +30,7 @@ def create_blog(request):
 @decorator.request_check_args(['page'])
 def blog_list(request):
     page_num = request.GET.get('page')
+    uid = request.GET.get('uid')
 
     blogs = utils.get_page_blog_list(Blog.objects.filter(is_deleted=0), page_num)
     final_blogs = []
@@ -53,8 +54,15 @@ def blog_list(request):
                                                             object_id=blog.id)
         blog_content_json['likeCount'] = like_num.liked_num
 
-        blog_json['blog'] = blog_content_json
+        # 用户是否点赞过
+        is_like = LikeRecord.objects.filter(masuser__uid=uid,
+                                            content_type=content_type,
+                                            object_id=blog.id).first()
+        blog_content_json['isLike'] = 0
+        if is_like:
+            blog_content_json['isLike'] = 1
 
+        blog_json['blog'] = blog_content_json
         final_blogs.append(blog_json)
 
     json = {

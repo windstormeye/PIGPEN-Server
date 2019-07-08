@@ -1,5 +1,4 @@
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import ObjectDoesNotExist
 from .models import LikeCount, LikeRecord
 from user.models import MasUser
 from blog.models import Blog
