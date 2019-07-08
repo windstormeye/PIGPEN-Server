@@ -1,5 +1,6 @@
 import datetime
 import time
+from enum import Enum, unique
 
 from django.conf import settings
 from django.core.paginator import Paginator
@@ -9,17 +10,51 @@ from qiniu import Auth
 from common import masLogger
 
 
-def ErrorResponse(code, message, request):
-    data = {'msgCode': code, 'msg': message}
-    masLogger.log(request, 2333, message)
+def ErrorResponse(code, request):
+    code_msg = codeMsg(code.value)
+
+    data = {'msgCode': code.value, 'msg': code_msg}
+    masLogger.log(request, 2333, code_msg)
     return JsonResponse(data)
 
 
 # 成功响应
 def SuccessResponse(message, request):
-    data = {'msgCode': 0, 'msg': message}
+    data = {'msgCode': Code.ok.value, 'msg': message}
     masLogger.log(request, 0)
     return JsonResponse(data)
+
+
+def codeMsg(code):
+    code_msg = {
+        0: 'ok',
+        1: 'notFound',
+        2: 'existed',
+        3: 'paramsError',
+        4: 'methodError',
+        5: 'error',
+    }
+
+    return code_msg[code]
+
+
+@unique
+class Code(Enum):
+    """
+    返回体状态码
+    """
+    # 正常
+    ok = 0
+    # 找不到
+    notFound = 1
+    # 已存在
+    existed = 2
+    # 参数错误
+    paramsError = 3
+    # 请求方法错误
+    methodError = 4
+    # 出错了
+    err = 5
 
 
 def get_page_blog_list(contents, page_num):

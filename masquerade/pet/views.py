@@ -10,7 +10,7 @@ from play.models import DogPlayTarget
 from drink.models import Drink
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['pet_nick_name', 'gender', 'pet_type',
                                'birth_time', 'weight', 'ppp_status',
                                'love_status', 'relation_code', 'avatar_key',
@@ -64,10 +64,10 @@ def create_pet(request):
         pet_json['relationship'] = int(relation.relationship_code)
         return utils.SuccessResponse(pet_json, request)
     else:
-        return utils.ErrorResponse('2333', 'user not exist', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_type'])
 def get_breeds(request):
     pet_type = request.GET.get('pet_type', '')
@@ -82,10 +82,10 @@ def get_breeds(request):
         }
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse('2333', '不支持该物种', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['imageCount'])
 def get_pet_upload_avatar_token(request):
     imageCount = int(request.GET.get('imageCount', "1"))
@@ -102,7 +102,7 @@ def get_pet_upload_avatar_token(request):
     return utils.SuccessResponse(f_json, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['keys'])
 def upload_pet_avatar_key(request):
     keys = request.POST.get('keys')
@@ -116,10 +116,10 @@ def upload_pet_avatar_key(request):
         }
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse('2333', 'keys is empty', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args([])
 def get_play_details(request):
     uid = request.GET.get('uid')
@@ -163,8 +163,6 @@ def get_pet(pet_id, uid):
             pet_json['relationship'] = pet_relation.relationship_code
 
             return pet_json
-
-
 
 
 # 获取所有狗品种
@@ -263,6 +261,3 @@ def init_cat_breed():
 # 新增猫品种
 def add_cat_breed(breed_name='未知品种', group='W'):
     cat_breed(zh_name=breed_name, group=group).save()
-
-
-

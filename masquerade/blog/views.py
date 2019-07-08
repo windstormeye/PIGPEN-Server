@@ -7,7 +7,7 @@ from comment.models import Comment
 from common import utils, decorator
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['content', 'imgs', 'petIds'])
 def create_blog(request):
     pet_ids = request.POST.get('petIds')
@@ -21,12 +21,12 @@ def create_blog(request):
             if pet:
                 Blog(pet=pet, content=content, imgs=imgs).save()
             else:
-                utils.ErrorResponse(2333, 'Pet Not Found', request)
+                utils.ErrorResponse(utils.Code.notFound, request)
 
     return utils.SuccessResponse('ok', request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['page'])
 def blog_list(request):
     page_num = request.GET.get('page')
@@ -63,7 +63,20 @@ def blog_list(request):
     return utils.SuccessResponse(json, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
+@decorator.request_check_args(['blog_id'])
+def blog_details(request):
+    blog_id = request.POST.get('blog_id')
+
+    blog = Blog.objects.filter(id=blog_id).first()
+    if blog:
+        return utils.SuccessResponse(blog.toJSON(), request)
+    else:
+        return utils.ErrorResponse(utils.Code.notFound, request)
+
+
+
+@decorator.request_method('GET')
 @decorator.request_check_args(['blog_id'])
 def delete_blog(request):
     masuser_id = request.GET.get('masuser_id')
@@ -76,12 +89,12 @@ def delete_blog(request):
             findBlog.delete()
             return utils.SuccessResponse('删除成功', request)
         else:
-            return utils.ErrorResponse(2333, '删除失败，文章不存在', request)
+            return utils.ErrorResponse(utils.Code.notFound, request)
     else:
-        return utils.ErrorResponse(2333, '删除失败，只能删除自己发布的文章', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['page'])
 def get_user_blog(request):
     userId = request.GET.get('masuser_id')
@@ -103,35 +116,34 @@ def get_user_blog(request):
         }
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse(2333, '该用户未发布文章', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
-@decorator.request_check_args(['content_type', 'object_id'])
+@decorator.request_method('GET')
+@decorator.request_check_args(['object_id'])
 def blog_details(request):
-    content_type = request.GET.get('content_type', '')
     # blog_id
     object_id = request.GET.get('object_id', '')
 
-    contentType = ContentType.objects.get(model=content_type)
-    readnum, create = ReadNumber.objects.get_or_create(
-        content_type=contentType, object_id=object_id)
-    readnum.read_num += 1
-    readnum.save()
+    content_type = ContentType.objects.get(model='blog')
+    read_num, create = ReadNumber.objects.get_or_create(
+        content_type=content_type, object_id=object_id)
+    read_num.read_num += 1
+    read_num.save()
     blog = Blog.objects.filter(pk=object_id, is_deleted=0).filter()
 
     if blog:
         # get blog like_num
         like_count, created = LikeCount.objects.get_or_create(
-            content_type=contentType, object_id=object_id)
+            content_type=content_type, object_id=object_id)
 
         # get comment_num
-        comments = Comment.objects.filter(content_type=contentType,
+        comments = Comment.objects.filter(content_type=content_type,
                                           object_id=object_id).count()
 
         json = {
             'blog': {
-                'read_num': readnum.read_num,
+                'read_num': read_num.read_num,
                 'comment_num': comments,
                 'like_num': like_count.liked_num,
                 'blog_content': blog.content,
@@ -141,4 +153,4 @@ def blog_details(request):
         }
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse(2333, '该文章不存在', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)

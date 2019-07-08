@@ -6,7 +6,7 @@ from .models import Eat, EatActivity
 from score.models import EatDayScore, EatScore
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['pet_id', 'foods'])
 def create(request):
     """
@@ -22,10 +22,10 @@ def create(request):
 
         return utils.SuccessResponse('ok', request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['pet_id', 'eat_id'])
 def delete(request):
     """
@@ -39,10 +39,10 @@ def delete(request):
         Eat.objects.filter(id=eat_id).delete()
         return utils.SuccessResponse('ok', request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['pet_id', 'eat_id', 'foods'])
 def update(request):
     """
@@ -60,12 +60,12 @@ def update(request):
             pet_eat.save()
             return utils.SuccessResponse('ok', request)
         else:
-            return utils.ErrorResponse(2333, 'Not Found', request)
+            return utils.ErrorResponse(utils.Code.notFound, request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_id', 'page'])
 def all(request):
     """
@@ -113,10 +113,10 @@ def all(request):
         pet_eats_jsons.append(json)
         return utils.SuccessResponse(pet_eats_jsons, request)
     else:
-        return utils.ErrorResponse(2333, 'pet not exist', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_id'])
 def day(request):
     """
@@ -150,7 +150,7 @@ def day(request):
 
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
 def updateLastFoods(pet, foods):

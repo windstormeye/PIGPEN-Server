@@ -6,7 +6,7 @@ from .models import Drink, DrinkTarget, DrinkActivity
 from score.models import DrinkDayScore, DrinkScore
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['pet_id', 'waters'])
 def create(request):
     """
@@ -22,10 +22,10 @@ def create(request):
 
         return utils.SuccessResponse('ok', request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['pet_id', 'drink_id'])
 def delete(request):
     """
@@ -39,10 +39,10 @@ def delete(request):
         Drink.objects.filter(id=drink_id).delete()
         return utils.SuccessResponse('ok', request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['pet_id', 'drink_id', 'waters'])
 def update(request):
     """
@@ -60,12 +60,12 @@ def update(request):
             pet_drink.save()
             return utils.SuccessResponse('ok', request)
         else:
-            return utils.ErrorResponse(2333, 'Not Found', request)
+            return utils.ErrorResponse(utils.Code.notFound, request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_id', 'page'])
 def all(request):
     """
@@ -113,10 +113,10 @@ def all(request):
         pet_drinks_jsons.append(json)
         return utils.SuccessResponse(pet_drinks_jsons, request)
     else:
-        return utils.ErrorResponse(2333, 'pet not exist', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_id'])
 def day(request):
     """
@@ -159,7 +159,7 @@ def day(request):
 
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
 def updateLastWaters(pet, waters):

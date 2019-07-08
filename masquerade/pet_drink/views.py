@@ -4,7 +4,7 @@ from pet.models import Pet
 from common import decorator, utils
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_id'])
 def petWaterDetails(request):
     """获取宠物水量详情：当前分数、当前时间段分数、当前剩水量、预期消耗完时间、log"""
@@ -46,7 +46,7 @@ def petWaterDetails(request):
                                    request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['pet_id',
                                'water_consume'])
 def updateWaterConsume(request):
@@ -81,7 +81,7 @@ def updateWaterConsume(request):
                                    request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['pet_id',
                                'water_residue'])
 def updateWaterResidue(request):

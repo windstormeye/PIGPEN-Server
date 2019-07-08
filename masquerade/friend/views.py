@@ -6,7 +6,7 @@ from friend.models import Friend
 from user.models import MasUser
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['type'])
 def getFriend(request):
     uid = request.GET.get('uid')
@@ -33,7 +33,7 @@ def getFriend(request):
     return utils.SuccessResponse(json, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['friendId', 'status'])
 def addFriend(request):
     uid = request.POST.get('uid')
@@ -49,9 +49,7 @@ def addFriend(request):
                                  | Q(userA__uid=uid)
                                  | Q(userB__uid=uid),
                                  status=1):
-            return utils.ErrorResponse(2333,
-                                       "You're already friends",
-                                       request)
+            return utils.ErrorResponse(utils.Code.existed, request)
         else:
             Friend(userA=uid_user,
                    userB=friendId_user,
@@ -59,15 +57,12 @@ def addFriend(request):
             json = {
                 'status': 'ok'
             }
-            return utils.SuccessResponse(json,
-                                         request)
+            return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse(2333,
-                                   'user not exist',
-                                   request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['s_nick_name'])
 def searchFriend(request):
     nick_name = request.GET.get('s_nick_name')

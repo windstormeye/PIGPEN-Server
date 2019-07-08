@@ -6,68 +6,54 @@ from blog.models import Blog
 from common import utils, decorator
 
 
-@decorator.request_methon('POST')
-@decorator.request_check_args(['content_type', 'object_id', 'is_like'])
+@decorator.request_method('POST')
+@decorator.request_check_args(['blog_id', 'is_like'])
 def like_change(request):
-    masuser_id = request.POST.get('masuser_id', '')
-    is_like = request.POST.get('is_like', '')
-    content_type = request.POST.get('content_type')
-    object_id = int(request.POST.get('object_id'))
+    uid = request.POST.get('uid')
+    is_like = request.POST.get('is_like')
+    blog_id = request.POST.get('blog_id')
 
-    masuser = MasUser.objects.get(pk=masuser_id)
+    masuser = MasUser.objects.filter(uid=uid).first()
+    content_type = ContentType.objects.get(model='blog')
 
-    # is_blog
-    try:
-        content_type = ContentType.objects.get(model=content_type)
-        model_class = content_type.model_class()
-        model_obj = model_class.objects.get(pk=object_id)
-    except ObjectDoesNotExist:
-        return utils.ErrorResponse(2333, '点赞文章不存在')
-
-    if is_like == 'true':
+    if int(is_like) == 1:
         # will like
         like_record, created = LikeRecord.objects.get_or_create(
-            content_type=content_type, object_id=object_id, masuser=masuser)
+            content_type=content_type, object_id=blog_id, masuser=masuser)
         if created:
             # not like, to like
             # like_num + 1
             like_count, created = LikeCount.objects.get_or_create(
-                content_type=content_type, object_id=object_id)
+                content_type=content_type, object_id=blog_id)
             like_count.liked_num += 1
             like_count.save()
 
-            json = {
-                'blog_id': object_id,
-                'like_num': like_count.liked_num,
-            }
-            return utils.SuccessResponse(json, request)
+            return utils.SuccessResponse(utils.codeMsg(0), request)
         else:
-            # did like, not like
-            return utils.ErrorResponse(2333, '已点赞过该文章', request)
+            return utils.ErrorResponse(utils.Code.existed, request)
     else:
-        # cancle like
-        if LikeRecord.objects.filter(content_type=content_type,
-                                     object_id=object_id,
-                                     masuser=masuser).exists():
-            # did like, cancle like
+        like_recode = LikeRecord.objects.filter(content_type=content_type,
+                                                object_id=blog_id,
+                                                masuser=masuser).first()
+        if like_recode:
             like_record = LikeRecord.objects.get(content_type=content_type,
-                                                 object_id=object_id,
+                                                 object_id=blog_id,
                                                  masuser=masuser)
             like_record.delete()
-            # like_num - 1
-            like_count, created = LikeCount.objects.get_or_create(
-                content_type=content_type, object_id=object_id)
+
+            like_count, created = LikeCount.objects.get_or_create(content_type=content_type,
+                                                                  object_id=blog_id)
             if not created:
                 like_count.liked_num -= 1
                 like_count.save()
                 return utils.SuccessResponse(like_count.liked_num, request)
             else:
-                return utils.ErrorResponse(2333, '数据异常', request)
+                return utils.ErrorResponse(utils.Code.err, request)
         else:
-            return utils.ErrorResponse(2333, '未点赞过该文章', request)
+            return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['page'])
 def get_like_blog(request):
     masuser_id = request.GET.get('masuser_id')

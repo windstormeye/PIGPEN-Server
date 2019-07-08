@@ -4,7 +4,7 @@ from .models import Comment
 from common import utils, decorator, masLogger
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['content_type', 'content_id', 'text'])
 def create_comment(request):
     masuserId = request.POST.get('masuser_id', '')
@@ -31,7 +31,7 @@ def create_comment(request):
     return utils.SuccessResponse('评论发布成功', request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['content_type', 'content_id', 'page'])
 def get_comment(request):
     contentType = request.POST.get('content_type')
@@ -81,7 +81,7 @@ def get_comment(request):
     return utils.SuccessResponse(json, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['content_type', 'content_id'])
 def delete_comment(request):
     masuser_id = request.POST.get('masuser_id', '')

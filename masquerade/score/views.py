@@ -5,7 +5,7 @@ from eat import views as eat_views
 from .models import DrinkDayScore, EatDayScore
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_id'])
 def drinkGet(request):
     """
@@ -20,10 +20,10 @@ def drinkGet(request):
         if current_drink_score:
             return utils.SuccessResponse(current_drink_score.toJSON(), request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_id'])
 def eatGet(request):
     """
@@ -38,4 +38,4 @@ def eatGet(request):
         if current_eat_score:
             return utils.SuccessResponse(current_eat_score.toJSON(), request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)

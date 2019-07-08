@@ -6,7 +6,7 @@ from pet.models import Pet
 from pet.views import get_pet
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['phoneNumber', 'password', 'avatar', 'gender'])
 def create_masuser(request):
     phone_number = request.POST.get('phoneNumber')
@@ -17,7 +17,7 @@ def create_masuser(request):
     gender = request.POST.get('gender')
 
     if MasUser.objects.filter(phone_number=phone_number).exists():
-        return utils.ErrorResponse(2333, 'user exist', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
     masuser = MasUser.create(phone_number=phone_number, password=password,
                              avatar=avatar, nick_name=nick_name, gender=gender)
@@ -32,7 +32,7 @@ def create_masuser(request):
     return utils.SuccessResponse(json, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['sign', 'timestamp', 'phoneNumber'])
 def login(request):
     phone_number = request.POST.get('phoneNumber')
@@ -54,12 +54,12 @@ def login(request):
             }
             return utils.SuccessResponse(json, request)
         else:
-            return utils.ErrorResponse(2333, '密码错误', request)
+            return utils.ErrorResponse(utils.Code.notFound, request)
     else:
-        return utils.ErrorResponse(2333, '用户不存在', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args([])
 def logout(request):
     username = request.POST.get('uid')
@@ -71,7 +71,7 @@ def logout(request):
 
 
 # 获取用户宠物信息
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args([])
 def get_user_pet_info(request):
     uid = request.GET.get('uid')
@@ -90,7 +90,7 @@ def get_user_pet_info(request):
 
 
 # 获取用户简单信息
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['details_uid'])
 def get_user_details(request):
     details_uid = request.GET.get('details_uid')
@@ -102,10 +102,10 @@ def get_user_details(request):
         }
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse(2333, 'user not exist', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['avatar', 'gender'])
 def update_user(request):
     uid = request.POST.get('uid')
@@ -121,10 +121,10 @@ def update_user(request):
         }
         return utils.SuccessResponse(json, request)
     else:
-        return utils.ErrorResponse(2333, '用户不存在', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args([])
 def update_token(request):
     uid = request.GET.get('uid')
@@ -137,7 +137,7 @@ def update_token(request):
     return utils.SuccessResponse(json, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['phoneNumber'])
 def check_phone(request):
     phone_number = request.GET.get('phoneNumber')
@@ -145,8 +145,7 @@ def check_phone(request):
     user = MasUser.objects.filter(phone_number=phone_number).first()
 
     if user:
-        masLogger.log(request, 2333, '用户已注册')
-        return utils.ErrorResponse(2333, '用户已注册', request)
+        return utils.ErrorResponse(utils.Code.existed, request)
     else:
         json = {
             'status': '可注册'
@@ -154,7 +153,7 @@ def check_phone(request):
         return utils.SuccessResponse(json, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args([])
 def getRCToken(request):
     from rongcloud import RongCloud
@@ -178,4 +177,4 @@ def getRCToken(request):
         return utils.SuccessResponse(json, request)
     else:
         masLogger.log(request, 2333, str(r.response.content, encoding='utf-8'))
-        return utils.ErrorResponse(2333, 'RCToken error', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)

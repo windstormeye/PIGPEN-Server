@@ -4,7 +4,7 @@ from pet.models import Pet
 from common import utils, decorator
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['durations', 'pet_id', 'pet_type'])
 def updateCatPlay(request):
     pet_id = request.POST.get('pet_id')
@@ -37,10 +37,10 @@ def updateCatPlay(request):
         else:
             pass
     else:
-        return utils.ErrorResponse(2333, 'pet not exist', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_id', 'pet_type'])
 def getCatPlay(request):
     pet_id = request.GET.get('pet_id')
@@ -54,12 +54,12 @@ def getCatPlay(request):
 
             return utils.SuccessResponse(pet_play.toJSON(), request)
         else:
-            return utils.ErrorResponse(2333, 'pet not cat', request)
+            return utils.ErrorResponse(utils.Code.notFound, request)
     else:
-        return utils.ErrorResponse(2333, 'pet not exist', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['pet_id', 'play_id', 'pet_type'])
 def delete(request):
     """
@@ -79,10 +79,10 @@ def delete(request):
             DogPlay.objects.filter(id=play_id).delete()
             return utils.SuccessResponse('ok', request)
     else:
-        return utils.ErrorResponse(2333, 'Not Found', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('POST')
+@decorator.request_method('POST')
 @decorator.request_check_args(['kcal', 'pet_id', 'durations'])
 def updateDogPlay(request):
     pet_id = request.POST.get('pet_id')
@@ -96,12 +96,12 @@ def updateDogPlay(request):
             DogPlay(pet=pet, kals=kcal, durations=durations).save()
             return utils.SuccessResponse('ok', request)
         else:
-            return utils.ErrorResponse(2333, 'pet not dog', request)
+            return utils.ErrorResponse(utils.Code.notFound, request)
     else:
-        return utils.ErrorResponse(2333, 'pet not exist', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_id', 'page'])
 def getDogPlay(request):
     """
@@ -151,12 +151,12 @@ def getDogPlay(request):
             pet_play_jsons.append(json)
             return utils.SuccessResponse(pet_play_jsons, request)
         else:
-            return utils.ErrorResponse(2333, 'pet not dog', request)
+            return utils.ErrorResponse(utils.Code.notFound, request)
     else:
-        return utils.ErrorResponse(2333, 'pet not exist', request)
+        return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-@decorator.request_methon('GET')
+@decorator.request_method('GET')
 @decorator.request_check_args(['pet_id'])
 def getDogTodayPlay(request):
     """
