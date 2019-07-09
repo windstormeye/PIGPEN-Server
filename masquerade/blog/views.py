@@ -5,6 +5,7 @@ from read_statistics.models import ReadNumber
 from like_statistics.models import LikeCount, LikeRecord
 from comment.models import Comment
 from common import utils, decorator
+from collect_statistics.models import Collect
 
 
 @decorator.request_method('POST')
@@ -62,13 +63,15 @@ def blog_list(request):
         if is_like:
             blog_content_json['isLike'] = 1
 
+        # 用户是否收藏过
+        is_collect = Collect.objects.filter(user__uid=uid, blog=blog).first()
+        blog_content_json['isCollect'] = 0
+        if is_collect:
+            blog_content_json['isCollect'] = 1
+
         blog_json['blog'] = blog_content_json
         final_blogs.append(blog_json)
-
-    json = {
-        'blogs': list(final_blogs),
-    }
-    return utils.SuccessResponse(json, request)
+    return utils.SuccessResponse(final_blogs, request)
 
 
 @decorator.request_method('GET')

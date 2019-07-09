@@ -26,7 +26,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    '192.168.0.104',
+    '192.168.0.105',
     'pigpen.pjhubs.com',
 ]
 
@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'score',
     'play',
     'drink',
-    'eat'
+    'eat',
+    'collect_statistics',
 ]
 
 MIDDLEWARE = [
