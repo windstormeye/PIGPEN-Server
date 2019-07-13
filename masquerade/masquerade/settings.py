@@ -26,7 +26,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    '192.168.0.105',
+    '192.168.0.108',
     'pigpen.pjhubs.com',
 ]
 

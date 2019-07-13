@@ -94,6 +94,21 @@ class Pet(models.Model):
         return pet
 
 
+class Around(models.Model):
+    """
+    附近的宠物
+    """
+    user = models.ForeignKey(MasUser, on_delete=models.CASCADE)
+
+    # 纬度
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    # 经度
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+
+    created_time = models.DateTimeField(auto_now_add=True)
+    updated_time = models.DateTimeField(auto_now=True)
+
+
 class dog_breed(models.Model):
     """
     狗 种类

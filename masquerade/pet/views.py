@@ -1,8 +1,9 @@
 import pinyin
+from django.db.models import Q
 from django.conf import settings
 from user.models import MasUser
 from common import utils, decorator
-from .models import Pet, dog_breed, cat_breed
+from .models import Pet, dog_breed, cat_breed, Around
 from relationship.models import PetRelationship
 from avatar.models import Avatar
 from score.models import PetScore
@@ -115,6 +116,46 @@ def upload_pet_avatar_key(request):
             'image_urls': urls
         }
         return utils.SuccessResponse(json, request)
+    else:
+        return utils.ErrorResponse(utils.Code.notFound, request)
+
+
+@decorator.request_method('GET')
+@decorator.request_check_args(['latitude', 'longitude', 'page', 'uid'])
+def getAroundPets(request):
+    """
+    发现附近的猫狗
+    """
+    latitude = request.GET.get('latitude')
+    longitude = request.GET.get('longitude')
+    page_num = request.GET.get('page')
+    uid = request.GET.get('uid')
+
+    user = MasUser.objects.filter(uid=uid).first()
+    if user:
+        arounds = utils.get_page_blog_list(Around.objects.filter(~Q(user=user)), page_num)
+        pet_json = []
+
+        for around in arounds:
+            distance = utils.haversine(float(longitude), float(latitude), around.longitude, around.latitude)
+            pets = Pet.objects.filter(user=around.user)
+
+            for pet in pets:
+                p_j = {
+                    'distance': float('%.1f' % distance),
+                    'pet': pet.toJSON()
+                }
+                pet_json.append(p_j)
+
+        pet_around = Around.objects.filter(user=user).first()
+        if pet_around:
+            pet_around.latitude = latitude
+            pet_around.longitude = longitude
+            pet_around.save()
+        else:
+            Around(user=user, latitude=latitude, longitude=longitude).save()
+
+        return utils.SuccessResponse(pet_json, request)
     else:
         return utils.ErrorResponse(utils.Code.notFound, request)
 
