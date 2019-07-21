@@ -86,7 +86,6 @@ def blog_details(request):
         return utils.ErrorResponse(utils.Code.notFound, request)
 
 
-
 @decorator.request_method('GET')
 @decorator.request_check_args(['blog_id'])
 def delete_blog(request):

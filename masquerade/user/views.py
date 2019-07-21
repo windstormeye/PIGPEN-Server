@@ -20,7 +20,7 @@ def create_masuser(request):
         return utils.ErrorResponse(utils.Code.notFound, request)
 
     masuser = MasUser.create(phone_number=phone_number, password=password,
-                             avatar=avatar, nick_name=nick_name, gender=gender)
+                             avatar=avatar, nick_fname=nick_name, gender=gender)
     token = token_utils.create_token(masuser.uid)
     json = {
         'masuser': masuser.toJSON(),

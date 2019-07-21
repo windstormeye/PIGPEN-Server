@@ -4,7 +4,7 @@ from math import radians, cos, sin, asin, sqrt
 from enum import Enum, unique
 
 from django.conf import settings
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.http import JsonResponse
 from qiniu import Auth
 
@@ -65,9 +65,14 @@ def get_page_blog_list(contents, page_num):
     :param page_num: 当前分页
     """
     paginator = Paginator(contents, settings.EACH_PAGE_BLOGS_NUMBER)
-    page_of_contents = paginator.get_page(page_num)
 
-    return page_of_contents
+    try:
+        datas = paginator.page(page_num)  # 获取某页对应的记录
+    except PageNotAnInteger:  # 如果页码不是个整数
+        datas = paginator.page(1)  # 取第一页的记录
+    except EmptyPage:  # 如果页码太大，没有相应的记录
+        datas = []
+    return datas
 
 
 def create_upload_image_token(count, key):
