@@ -202,7 +202,8 @@ def get_pet(pet_id, uid):
         if pet_relation:
             pet_json = pet.toJSON()
             pet_json['relationship'] = pet_relation.relationship_code
-
+            (pet_score, created) = PetScore.objects.get_or_create(pet=pet)
+            pet_json['score'] = pet_score.toJSON()
             return pet_json
 
 

@@ -105,13 +105,12 @@ def delete_blog(request):
 
 
 @decorator.request_method('GET')
-@decorator.request_check_args(['page'])
-def get_user_blog(request):
-    userId = request.GET.get('masuser_id')
+@decorator.request_check_args(['page', 'pet_id'])
+def get_pet_blog(request):
+    pet_id = request.GET.get('pet_id')
     page_num = request.GET.get('page')
-
-    blogs = utils.get_page_blog_list(Blog.objects.filter(
-        masuser__pk=userId, is_deleted=0), page_num)
+    blogs = utils.get_page_blog_list(Blog.objects.filter(pet__pet_id=pet_id,
+                                                         is_deleted=0), page_num)
     final_blogs = []
     for blog in blogs:
         b = {
@@ -120,13 +119,11 @@ def get_user_blog(request):
             'created_time': blog.created_time,
         }
         final_blogs.append(b)
-    if blogs:
-        json = {
-            'blogs': list(final_blogs)
-        }
-        return utils.SuccessResponse(json, request)
-    else:
-        return utils.ErrorResponse(utils.Code.notFound, request)
+
+    json = {
+        'blogs': list(final_blogs)
+    }
+    return utils.SuccessResponse(json, request)
 
 
 @decorator.request_method('GET')
